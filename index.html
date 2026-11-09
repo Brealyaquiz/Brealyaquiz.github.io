@@ -1,0 +1,1087 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Phone Resale</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{
+  --bg:var(--tg-theme-bg-color,#ffffff);
+  --bg2:var(--tg-theme-secondary-bg-color,#f1f3f5);
+  --text:var(--tg-theme-text-color,#14171a);
+  --hint:var(--tg-theme-hint-color,#6b7480);
+  --accent:var(--tg-theme-button-color,#2f7df6);
+  --accent-text:var(--tg-theme-button-text-color,#ffffff);
+  --bad:#d64545;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:var(--tg-theme-bg-color,#17212b);
+    --bg2:var(--tg-theme-secondary-bg-color,#232e3c);
+    --text:var(--tg-theme-text-color,#f5f5f5);
+    --hint:var(--tg-theme-hint-color,#8a99a8);
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+  font:17px/1.4 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+#app{display:flex;flex-direction:column;height:100%;max-width:560px;margin:0 auto}
+button{font:inherit;cursor:pointer}
+
+.status{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg2)}
+.status .info{flex:1;min-width:0}
+.money{font-size:22px;font-weight:800;line-height:1.1}
+.meta{color:var(--hint);font-size:13px}
+.chip{border:0;border-radius:14px;background:var(--accent);color:var(--accent-text);
+  min-height:50px;padding:0 16px;font-size:15px;font-weight:700}
+
+.appbar{display:flex;align-items:center;gap:8px;padding:8px 12px}
+.ab{border:0;background:var(--bg2);color:var(--text);border-radius:14px;width:52px;height:52px;font-size:24px}
+.ttl{flex:1;text-align:center;font-weight:700;font-size:18px}
+
+main{flex:1;overflow-y:auto;padding:14px 14px 130px}
+main.chat{overflow:hidden;display:flex;flex-direction:column;padding-bottom:0}
+h2{margin:0 0 4px;font-size:21px}
+.hint{color:var(--hint);margin:0 0 14px;font-size:14px}
+.empty{color:var(--hint);text-align:center;padding:34px 0}
+
+.home{display:grid;grid-template-columns:repeat(3,1fr);gap:18px 8px;padding:16px 0}
+.app{border:0;background:transparent;color:var(--text);display:flex;flex-direction:column;align-items:center;gap:8px;
+  font-size:13px;padding:4px;position:relative}
+.app .ic{width:76px;height:76px;border-radius:22px;display:flex;align-items:center;justify-content:center;
+  font-size:38px;box-shadow:0 4px 10px #0003}
+.badge{position:absolute;top:0;right:8px;background:var(--bad);color:#fff;border-radius:12px;min-width:24px;height:24px;
+  font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 6px}
+.evb{background:linear-gradient(90deg,#ff9a3c,#ff4d6d);color:#fff;border-radius:14px;padding:10px 14px;margin-bottom:8px;font-weight:700;font-size:15px}
+
+.card{display:flex;align-items:center;gap:12px;background:var(--bg2);border-radius:16px;padding:12px;margin-bottom:12px;
+  width:100%;border:0;color:var(--text);text-align:left;min-height:84px}
+.card .ct{flex:1;min-width:0}
+.nm{font-weight:700}
+.sub{color:var(--hint);font-size:14px}
+.thumb{width:54px;flex-shrink:0}
+.btn{border:0;border-radius:14px;background:var(--accent);color:var(--accent-text);
+  min-height:54px;padding:0 16px;font-size:16px;font-weight:700}
+.btn.ghost{background:transparent;color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
+.btn.danger{background:var(--bad);color:#fff}
+.btn.wide{width:100%;margin-bottom:12px}
+.btn.small{min-height:48px;padding:0 14px;font-size:15px}
+.btns{display:flex;gap:8px;flex-shrink:0}
+.row{display:flex;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid var(--bg2)}
+.row b{font-weight:700;text-align:right}
+.seg{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.seg .btn{flex:1;padding:0 6px;min-width:70px}
+label.t{display:block;margin:18px 0 8px;font-weight:700}
+input[type=text],input[type=password],textarea,select{width:100%;min-height:54px;padding:12px 14px;border-radius:14px;border:2px solid var(--bg2);
+  background:var(--bg2);color:var(--text);font:inherit;font-size:16px;margin-bottom:10px}
+textarea{min-height:64px;resize:vertical}
+.tag{display:inline-block;background:var(--bad);color:#fff;border-radius:6px;font-size:11px;padding:2px 6px;margin-left:6px;vertical-align:middle}
+
+.photos{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px;margin-bottom:14px}
+.photos img{width:150px;flex-shrink:0;scroll-snap-align:start;background:var(--bg2);border-radius:16px;object-fit:cover;aspect-ratio:120/220}
+.photos svg{width:150px;flex-shrink:0;scroll-snap-align:start;background:var(--bg2);border-radius:16px;padding:6px}
+.big svg{width:170px}
+
+.replies{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 0 10px}
+.replies .btn{min-height:52px;font-size:14px;padding:6px 8px;line-height:1.2}
+.replies .btn.full{grid-column:1/-1}
+.msgs{flex:1;overflow-y:auto;padding:4px 0 130px;display:flex;flex-direction:column;gap:8px}
+.bubble{max-width:82%;padding:10px 14px;border-radius:18px;font-size:16px}
+.bubble.me{align-self:flex-end;background:var(--accent);color:var(--accent-text);border-bottom-right-radius:4px}
+.bubble.sel{align-self:flex-start;background:var(--bg2);border-bottom-left-radius:4px}
+.bubble .photos{margin:8px 0 0}
+.bubble .photos svg{width:90px}
+.note{text-align:center;color:var(--hint);font-size:14px;padding:8px}
+.chathead{display:flex;justify-content:space-between;gap:8px;padding:0 2px 10px}
+.chathead b{font-size:15px}
+
+.scene{background:var(--bg2);border-radius:16px;padding:14px;margin-bottom:14px}
+.insp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.res{background:var(--bg2);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:15px}
+
+.frame{border-radius:34px;padding:22px 16px;margin:4px auto 16px;max-width:260px;min-height:380px;
+  box-shadow:0 8px 24px #0004,inset 0 0 0 6px #111}
+.frame .home{padding:8px 0;gap:14px 4px}
+.frame .app{color:#fff;text-shadow:0 1px 3px #0008}
+.frame .app .ic{width:64px;height:64px;font-size:32px}
+.clock{text-align:center;color:#fff;font-size:34px;font-weight:700;text-shadow:0 1px 4px #0006}
+
+#toast{position:fixed;left:50%;top:76px;transform:translateX(-50%);background:#000d;color:#fff;
+  padding:12px 18px;border-radius:14px;font-size:15px;opacity:0;pointer-events:none;
+  transition:opacity .2s;max-width:88%;text-align:center;z-index:30}
+#toast.show{opacity:1}
+.overlay{position:fixed;inset:0;background:#0009;display:flex;align-items:center;justify-content:center;padding:24px;z-index:5}
+.modal{background:var(--bg);border-radius:18px;padding:20px;max-width:380px;width:100%}
+.modal p{margin:8px 0 14px;white-space:pre-wrap}
+.modal .btns{justify-content:flex-end}
+.pill{display:inline-block;background:var(--bg2);border-radius:10px;padding:6px 10px;font-weight:700;margin-bottom:12px}
+
+#wipe{position:fixed;inset:0;z-index:50;background:#000c;display:flex;align-items:center;justify-content:center;color:#fff;text-align:center}
+#wipe .wtop{position:absolute;top:0;left:0;right:0;padding:16px 8px;background:#d10000;font-size:34px;font-weight:900;letter-spacing:2px}
+#wipe .wnum{font-size:170px;font-weight:900;line-height:1}
+#wipe.red{background:#c00000e6;animation:redpulse .5s ease-in-out infinite alternate}
+@keyframes redpulse{from{background:#8a0000e6}to{background:#ff1a1aee}}
+#wipe.boom{background:#fff;color:#000;animation:wflash .25s steps(2) 4}
+#wipe.boom .wnum{animation:wboom 1.6s ease-out forwards}
+@keyframes wflash{50%{background:#ff3b00}}
+@keyframes wboom{from{transform:scale(.4)}to{transform:scale(2.4)}}
+body.shake #app{animation:shake .08s linear infinite}
+@keyframes shake{0%{transform:translate(4px,3px)}50%{transform:translate(-4px,-3px)}100%{transform:translate(3px,-4px)}}
+.avatar{border-radius:50%;object-fit:cover;display:inline-flex;align-items:center;justify-content:center;background:var(--bg2);flex-shrink:0;overflow:hidden}
+.emojis{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:8px 0 14px}
+.emojis button{border:0;background:var(--bg2);border-radius:14px;font-size:28px;min-height:54px}
+.emojis button.on{box-shadow:inset 0 0 0 3px var(--accent)}
+.app.soon{opacity:.45;filter:grayscale(1)}
+.app small{color:var(--hint);font-size:11px;margin-top:-6px}
+.fx{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:20}
+.fx span{position:absolute;top:-60px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(115vh) rotate(360deg)}}
+body.disco #app{animation:disco .7s linear infinite}
+@keyframes disco{0%{filter:hue-rotate(0deg) saturate(1.6)}100%{filter:hue-rotate(360deg) saturate(1.6)}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast"></div>
+<script>
+"use strict";
+const tg = window.Telegram && window.Telegram.WebApp;
+try { if (tg) { tg.ready(); tg.expand(); } } catch (e) {}
+
+const PROMO = "90559055freeadminunlockmopsserialdigerunlock9055";   // тестовое меню
+const OWNER_CODE = "OWNER-4TqX9mZ2";                                 // панель владельца (измени на свой)
+const LIVE_URL = "https://admin-abuse-7ced8-default-rtdb.firebaseio.com";   // адрес Firebase Realtime Database, например "https://xxxx-default-rtdb.firebaseio.com"
+const SAVE_KEY = "phone_resale_v2";
+const START_MONEY = 500;
+const NAMES = ["Саша","Макс","Оля","Дима","Лена","Артём","Ника","Богдан"];
+
+// Примерные курсы к доллару. Игра внутри считает в $, на экране показывает валюту выбранного языка.
+const CUR = {ru:{s:"₽",r:81}, uk:{s:"₴",r:42}, kk:{s:"₸",r:520}, en:{s:"$",r:1}};
+
+const PHONES = [
+  ["iPhone 11",180],["iPhone 12",260],["iPhone 13",380],["iPhone 14",520],["iPhone 15 Pro",900],
+  ["Galaxy A54",200],["Galaxy S21",230],["Galaxy S23",420],["Pixel 7",280],["Pixel 8",400],
+  ["Redmi Note 12",130],["Xiaomi 13",300],["OnePlus 11",350],["Nothing Phone 2",320],["OnePlus 15",880],
+  ["🧪 Test Phone",1000]
+];
+const COND = [0.40,0.65,0.85,1.00];
+const BAT = [[55,75],[65,85],[78,92],[90,100]];
+
+/* ---------- переводы ---------- */
+const I = {
+ru:{
+ app_ads:"Объявления",app_chats:"Чаты",app_stock:"Склад",app_profile:"Профиль",app_settings:"Настройки",
+ home:"Домой",day:"День",demand:"Спрос",nextDay:"След. день",money:"Деньги",
+ adsTitle:"Объявления",adsHint:"Выбери телефон, напиши продавцу, поторгуйся и встреться.",adsEmpty:"Объявлений больше нет. Жми «След. день».",
+ ask:"Цена",seller:"Продавец",storage:"Память",listingTitle:"Объявление",photos:"Фото",write:"💬 Написать продавцу",openChat:"💬 Открыть чат",
+ chatsTitle:"Чаты",noChats:"Пока нет переписок. Выбери телефон в объявлениях.",chatPrice:"Цена сейчас",
+ closedNote:"Продавец закончил переписку.",doneNote:"Сделка завершена.",
+ q_hello:"Здравствуйте, ещё продаёте?",q_photos:"Пришлите ещё фото",q_cond:"Расскажите о состоянии",q_haggle:"Уступите за {p}?",
+ q_meet:"Давайте встретимся",q_bye:"Спасибо, не надо",goMeet:"🚶 Поехать на встречу",
+ s_hello:["Да, в наличии.","Добрый день! Ещё продаю.","Здравствуйте, актуально."],s_photos:"Вот ещё фото:",
+ s_cond:["Честно: экран разбит, но телефон работает.","Есть заметные царапины и потёртости.","Состояние хорошее, мелкие царапины.","Как новый, пользовался аккуратно."],
+ s_deal:"Ладно, договорились на {p}.",s_counter:"Меньше {p} не отдам.",s_angry:"Надоело торговаться. Ищите другой вариант.",
+ s_meet:"Давайте встретимся у метро через час. Цена {p}.",s_bye:"Хорошо, до свидания.",
+ meetTitle:"Встреча",meetIntro:"Вы встретились с продавцом ({n}). Осмотри телефон перед покупкой.",
+ i_screen:"👀 Экран",i_bat:"🔋 Батарея",i_imei:"🔎 IMEI",i_photo:"🖼 Сверить с фото",
+ r_screen:["Стекло в трещинах, но сенсор работает.","Царапины и пара сколов.","Лёгкие царапины, дисплей яркий.","Экран чистый, без царапин."],
+ r_bat:"Батарея держит {b}% от нового.",r_imei:"IMEI чистый, телефон не в блокировке.",r_photo:"Телефон совпадает с фото из объявления.",
+ buyFor:"Купить за {p}",leave:"Уйти",bought:"Куплено",noMoney:"Не хватает денег",left:"Ты ушёл со встречи",
+ stockTitle:"Склад",stockHint:"Нажми «Открыть», чтобы зайти в телефон.",stockEmpty:"Склад пуст. Загляни в объявления.",
+ sellAll:"💸 Продать всё",open:"Открыть",sell:"Продать",sold:"Продано за",soldAll:"Продано шт.",
+ phoneTitle:"Телефон",galleryTitle:"Галерея",gallery:"Галерея",gameApp:"Игра",deviceInfo:"Об устройстве",
+ model:"Модель",condition:"Состояние",battery:"Батарея",imei:"IMEI",paid:"Куплен за",worth:"Стоит сейчас",sellFor:"💸 Продать за {p}",
+ profileTitle:"Профиль",count:"Телефонов",stockValue:"Стоимость склада",
+ settingsTitle:"Настройки",language:"Язык и валюта",promo:"Промокод",promoPh:"Введи промокод",apply:"Применить",
+ promoOk:"Промокод принят",promoBad:"Неверный промокод",reset:"Сбросить весь прогресс",
+ resetAsk:"Точно сбросить весь прогресс? Деньги и склад пропадут.",resetYes:"Да, сбросить",resetNo:"Отмена",resetDone:"Прогресс сброшен",
+ adminTitle:"Тестовое меню",giveAll:"Выдать все телефоны",given:"Выдано телефонов",inf:"Бесконечные деньги",on:"ВКЛ",off:"ВЫКЛ",
+ cash:"+1 000 000",cashOk:"Добавлено 1 000 000",close:"Закрыть",newDay:"Новый день, спрос",
+ ownerTitle:"👑 Владелец",
+ wipe_title:"ВАЙП!!!",wipe_boom:"БУМ!",ob_title:"Создай профиль",ob_nick:"Твой ник (тег)",ob_nickPh:"например, phone_king",ob_upload:"📷 Загрузить фото",ob_tg:"Фото из Телеграма",ob_emoji:"Или выбери смайлик вместо фото",ob_start:"Начать игру",ob_save:"Сохранить",ob_err:"Ник: 3–16 символов, буквы, цифры и _",ob_needAvatar:"Выбери аватарку: загрузи фото или смайлик",profile_edit:"✏️ Изменить профиль",app_pm:"Маркет игроков",soon:"(скоро будет)",pm_toast:"Скоро будет!",
+ wipe_done:"Был вайп: весь прогресс сброшен. Начинай заново!",
+ ev_news:"📢 Новость",ev_ok:"Понятно",ev_gift:"🎁 Подарок: {p}",ev_phone:"📱 Подарок: телефон",ev_demand:"🔥 Спрос ×{v}",ev_disc:"🏷 Скидка {v}% на покупки",
+ conds:["Разбит","Плохое","Хорошее","Идеал"]},
+uk:{
+ app_ads:"Оголошення",app_chats:"Чати",app_stock:"Склад",app_profile:"Профіль",app_settings:"Налаштування",
+ home:"Додому",day:"День",demand:"Попит",nextDay:"Наст. день",money:"Гроші",
+ adsTitle:"Оголошення",adsHint:"Обери телефон, напиши продавцю, поторгуйся і зустрінься.",adsEmpty:"Оголошень більше немає. Тисни «Наст. день».",
+ ask:"Ціна",seller:"Продавець",storage:"Пам'ять",listingTitle:"Оголошення",photos:"Фото",write:"💬 Написати продавцю",openChat:"💬 Відкрити чат",
+ chatsTitle:"Чати",noChats:"Поки немає листувань. Обери телефон в оголошеннях.",chatPrice:"Ціна зараз",
+ closedNote:"Продавець закінчив листування.",doneNote:"Угоду завершено.",
+ q_hello:"Вітаю, ще продаєте?",q_photos:"Надішліть ще фото",q_cond:"Розкажіть про стан",q_haggle:"Поступитесь за {p}?",
+ q_meet:"Давайте зустрінемось",q_bye:"Дякую, не треба",goMeet:"🚶 Поїхати на зустріч",
+ s_hello:["Так, є в наявності.","Добрий день! Ще продаю.","Вітаю, актуально."],s_photos:"Ось ще фото:",
+ s_cond:["Чесно: екран розбитий, але телефон працює.","Є помітні подряпини та потертості.","Стан хороший, дрібні подряпини.","Як новий, користувався акуратно."],
+ s_deal:"Гаразд, домовились на {p}.",s_counter:"Менше ніж {p} не віддам.",s_angry:"Набридло торгуватись. Шукайте інший варіант.",
+ s_meet:"Давайте зустрінемось біля метро за годину. Ціна {p}.",s_bye:"Добре, до побачення.",
+ meetTitle:"Зустріч",meetIntro:"Ви зустрілися з продавцем ({n}). Огляньте телефон перед покупкою.",
+ i_screen:"👀 Екран",i_bat:"🔋 Батарея",i_imei:"🔎 IMEI",i_photo:"🖼 Звірити з фото",
+ r_screen:["Скло в тріщинах, але сенсор працює.","Подряпини та пара сколів.","Легкі подряпини, дисплей яскравий.","Екран чистий, без подряпин."],
+ r_bat:"Батарея тримає {b}% від нової.",r_imei:"IMEI чистий, телефон не заблокований.",r_photo:"Телефон збігається з фото з оголошення.",
+ buyFor:"Купити за {p}",leave:"Піти",bought:"Куплено",noMoney:"Не вистачає грошей",left:"Ти пішов зі зустрічі",
+ stockTitle:"Склад",stockHint:"Натисни «Відкрити», щоб зайти в телефон.",stockEmpty:"Склад порожній. Зазирни в оголошення.",
+ sellAll:"💸 Продати все",open:"Відкрити",sell:"Продати",sold:"Продано за",soldAll:"Продано шт.",
+ phoneTitle:"Телефон",galleryTitle:"Галерея",gallery:"Галерея",gameApp:"Гра",deviceInfo:"Про пристрій",
+ model:"Модель",condition:"Стан",battery:"Батарея",imei:"IMEI",paid:"Куплено за",worth:"Коштує зараз",sellFor:"💸 Продати за {p}",
+ profileTitle:"Профіль",count:"Телефонів",stockValue:"Вартість складу",
+ settingsTitle:"Налаштування",language:"Мова та валюта",promo:"Промокод",promoPh:"Введи промокод",apply:"Застосувати",
+ promoOk:"Промокод прийнято",promoBad:"Невірний промокод",reset:"Скинути весь прогрес",
+ resetAsk:"Точно скинути весь прогрес? Гроші й склад зникнуть.",resetYes:"Так, скинути",resetNo:"Скасувати",resetDone:"Прогрес скинуто",
+ adminTitle:"Тестове меню",giveAll:"Видати всі телефони",given:"Видано телефонів",inf:"Нескінченні гроші",on:"УВІМК",off:"ВИМК",
+ cash:"+1 000 000",cashOk:"Додано 1 000 000",close:"Закрити",newDay:"Новий день, попит",
+ wipe_title:"ВАЙП!!!",wipe_boom:"БУМ!",ob_title:"Створи профіль",ob_nick:"Твій нік (тег)",ob_nickPh:"наприклад, phone_king",ob_upload:"📷 Завантажити фото",ob_tg:"Фото з Телеграму",ob_emoji:"Або обери смайлик замість фото",ob_start:"Почати гру",ob_save:"Зберегти",ob_err:"Нік: 3–16 символів, літери, цифри та _",ob_needAvatar:"Обери аватарку: завантаж фото або смайлик",profile_edit:"✏️ Змінити профіль",app_pm:"Маркет гравців",soon:"(скоро буде)",pm_toast:"Скоро буде!",
+ wipe_done:"Був вайп: весь прогрес скинуто. Починай заново!",
+ ev_news:"📢 Новина",ev_ok:"Зрозуміло",ev_gift:"🎁 Подарунок: {p}",ev_phone:"📱 Подарунок: телефон",ev_demand:"🔥 Попит ×{v}",ev_disc:"🏷 Знижка {v}% на покупки",
+ conds:["Розбитий","Погане","Добре","Ідеал"]},
+kk:{
+ app_ads:"Хабарландыру",app_chats:"Чаттар",app_stock:"Қойма",app_profile:"Профиль",app_settings:"Баптаулар",
+ home:"Басты бет",day:"Күн",demand:"Сұраныс",nextDay:"Келесі күн",money:"Ақша",
+ adsTitle:"Хабарландыру",adsHint:"Телефонды таңда, сатушыға жаз, саудалас және кездес.",adsEmpty:"Хабарландыру қалмады. «Келесі күн» батырмасын бас.",
+ ask:"Бағасы",seller:"Сатушы",storage:"Жад",listingTitle:"Хабарландыру",photos:"Фото",write:"💬 Сатушыға жазу",openChat:"💬 Чатты ашу",
+ chatsTitle:"Чаттар",noChats:"Әзірге жазысу жоқ. Хабарландырудан телефон таңда.",chatPrice:"Қазіргі баға",
+ closedNote:"Сатушы жазысуды аяқтады.",doneNote:"Мәміле аяқталды.",
+ q_hello:"Сәлеметсіз бе, әлі сатасыз ба?",q_photos:"Тағы фото жіберіңізші",q_cond:"Жағдайы туралы айтыңызшы",q_haggle:"{p} болса бересіз бе?",
+ q_meet:"Кездесейік",q_bye:"Рахмет, керек емес",goMeet:"🚶 Кездесуге бару",
+ s_hello:["Иә, бар.","Қайырлы күн! Әлі сатып жатырмын.","Сәлем, өзекті."],s_photos:"Міне, тағы фото:",
+ s_cond:["Шынымды айтсам: экраны сынған, бірақ телефон жұмыс істейді.","Байқалатын сызаттар бар.","Жағдайы жақсы, ұсақ сызаттар бар.","Жаңадай, ұқыпты қолдандым."],
+ s_deal:"Жарайды, {p} болсын.",s_counter:"{p}-дан арзан бермеймін.",s_angry:"Саудаласып шаршадым. Басқа нұсқа іздеңіз.",
+ s_meet:"Бір сағаттан кейін метроның жанында кездесейік. Бағасы {p}.",s_bye:"Жақсы, сау болыңыз.",
+ meetTitle:"Кездесу",meetIntro:"Сатушымен ({n}) кездестіңіз. Сатып алмас бұрын телефонды қарап шық.",
+ i_screen:"👀 Экран",i_bat:"🔋 Батарея",i_imei:"🔎 IMEI",i_photo:"🖼 Фотомен салыстыру",
+ r_screen:["Әйнегі жарылған, бірақ сенсор жұмыс істейді.","Сызаттар мен бірнеше сынық бар.","Жеңіл сызаттар, дисплейі жарық.","Экран таза, сызатсыз."],
+ r_bat:"Батарея жаңасының {b}% ұстайды.",r_imei:"IMEI таза, телефон бұғатталмаған.",r_photo:"Телефон хабарландырудағы фотоға сәйкес.",
+ buyFor:"{p} төлеп алу",leave:"Кету",bought:"Сатып алынды",noMoney:"Ақша жетпейді",left:"Кездесуден кеттің",
+ stockTitle:"Қойма",stockHint:"Телефонға кіру үшін «Ашу» батырмасын бас.",stockEmpty:"Қойма бос. Хабарландыруларды қарап көр.",
+ sellAll:"💸 Барлығын сату",open:"Ашу",sell:"Сату",sold:"Сатылды:",soldAll:"Сатылған саны",
+ phoneTitle:"Телефон",galleryTitle:"Галерея",gallery:"Галерея",gameApp:"Ойын",deviceInfo:"Құрылғы туралы",
+ model:"Модель",condition:"Жағдайы",battery:"Батарея",imei:"IMEI",paid:"Сатып алынған бағасы",worth:"Қазіргі құны",sellFor:"💸 {p} болып сату",
+ profileTitle:"Профиль",count:"Телефон саны",stockValue:"Қойма құны",
+ settingsTitle:"Баптаулар",language:"Тіл және валюта",promo:"Промокод",promoPh:"Промокодты жаз",apply:"Қолдану",
+ promoOk:"Промокод қабылданды",promoBad:"Промокод қате",reset:"Бүкіл прогресті тазалау",
+ resetAsk:"Бүкіл прогресті тазалайсың ба? Ақша мен қойма жойылады.",resetYes:"Иә, тазалау",resetNo:"Бас тарту",resetDone:"Прогресс тазаланды",
+ adminTitle:"Тест мәзірі",giveAll:"Барлық телефонды беру",given:"Берілген телефон саны",inf:"Шексіз ақша",on:"ҚОСУЛЫ",off:"ӨШІРУЛІ",
+ cash:"+1 000 000",cashOk:"1 000 000 қосылды",close:"Жабу",newDay:"Жаңа күн, сұраныс",
+ wipe_title:"ВАЙП!!!",wipe_boom:"ГҮМ!",ob_title:"Профиль жасаңыз",ob_nick:"Ник (тег)",ob_nickPh:"мысалы, phone_king",ob_upload:"📷 Фото жүктеу",ob_tg:"Telegram фотосы",ob_emoji:"Немесе фото орнына смайлик таңда",ob_start:"Ойынды бастау",ob_save:"Сақтау",ob_err:"Ник: 3–16 таңба, әріптер, сандар және _",ob_needAvatar:"Аватар таңда: фото жүкте немесе смайлик",profile_edit:"✏️ Профильді өзгерту",app_pm:"Ойыншылар маркеті",soon:"(жақында)",pm_toast:"Жақында болады!",
+ wipe_done:"Вайп болды: бүкіл прогресс тазаланды. Қайта баста!",
+ ev_news:"📢 Жаңалық",ev_ok:"Түсінікті",ev_gift:"🎁 Сыйлық: {p}",ev_phone:"📱 Сыйлық: телефон",ev_demand:"🔥 Сұраныс ×{v}",ev_disc:"🏷 Сатып алуға {v}% жеңілдік",
+ conds:["Сынған","Нашар","Жақсы","Тамаша"]},
+en:{
+ app_ads:"Listings",app_chats:"Chats",app_stock:"Stock",app_profile:"Profile",app_settings:"Settings",
+ home:"Home",day:"Day",demand:"Demand",nextDay:"Next day",money:"Money",
+ adsTitle:"Listings",adsHint:"Pick a phone, message the seller, haggle and meet up.",adsEmpty:"No more listings. Tap “Next day”.",
+ ask:"Price",seller:"Seller",storage:"Storage",listingTitle:"Listing",photos:"Photos",write:"💬 Message seller",openChat:"💬 Open chat",
+ chatsTitle:"Chats",noChats:"No chats yet. Pick a phone in Listings.",chatPrice:"Price now",
+ closedNote:"The seller ended the chat.",doneNote:"Deal done.",
+ q_hello:"Hi, is it still for sale?",q_photos:"Send more photos, please",q_cond:"Tell me about its condition",q_haggle:"Would you take {p}?",
+ q_meet:"Let's meet up",q_bye:"Thanks, not interested",goMeet:"🚶 Go to the meetup",
+ s_hello:["Yes, it's available.","Hi! Still selling.","Hello, it's still for sale."],s_photos:"Here are more photos:",
+ s_cond:["To be honest: the screen is cracked, but it works.","Noticeable scratches and wear.","Good condition, minor scratches.","Like new, used carefully."],
+ s_deal:"Okay, deal at {p}.",s_counter:"I won't go below {p}.",s_angry:"I'm tired of haggling. Look for another one.",
+ s_meet:"Let's meet by the subway in an hour. Price {p}.",s_bye:"Alright, bye.",
+ meetTitle:"Meetup",meetIntro:"You met the seller ({n}). Inspect the phone before buying.",
+ i_screen:"👀 Screen",i_bat:"🔋 Battery",i_imei:"🔎 IMEI",i_photo:"🖼 Compare to photos",
+ r_screen:["Cracked glass, but the touch works.","Scratches and a couple of chips.","Light scratches, bright display.","Clean screen, no scratches."],
+ r_bat:"Battery holds {b}% of new.",r_imei:"IMEI is clean, the phone isn't locked.",r_photo:"The phone matches the listing photos.",
+ buyFor:"Buy for {p}",leave:"Leave",bought:"Bought",noMoney:"Not enough money",left:"You left the meetup",
+ stockTitle:"Stock",stockHint:"Tap “Open” to go into a phone.",stockEmpty:"Stock is empty. Check the listings.",
+ sellAll:"💸 Sell all",open:"Open",sell:"Sell",sold:"Sold for",soldAll:"Sold:",
+ phoneTitle:"Phone",galleryTitle:"Gallery",gallery:"Gallery",gameApp:"Game",deviceInfo:"About device",
+ model:"Model",condition:"Condition",battery:"Battery",imei:"IMEI",paid:"Bought for",worth:"Worth now",sellFor:"💸 Sell for {p}",
+ profileTitle:"Profile",count:"Phones",stockValue:"Stock value",
+ settingsTitle:"Settings",language:"Language & currency",promo:"Promo code",promoPh:"Enter promo code",apply:"Apply",
+ promoOk:"Promo code accepted",promoBad:"Invalid promo code",reset:"Reset all progress",
+ resetAsk:"Really reset all progress? Money and stock will be lost.",resetYes:"Yes, reset",resetNo:"Cancel",resetDone:"Progress reset",
+ adminTitle:"Test menu",giveAll:"Give all phones",given:"Phones given",inf:"Infinite money",on:"ON",off:"OFF",
+ cash:"+1,000,000",cashOk:"Added 1,000,000",close:"Close",newDay:"New day, demand",
+ wipe_title:"WIPE!!!",wipe_boom:"BOOM!",ob_title:"Create your profile",ob_nick:"Your nickname (tag)",ob_nickPh:"e.g. phone_king",ob_upload:"📷 Upload photo",ob_tg:"Telegram photo",ob_emoji:"Or pick an emoji instead",ob_start:"Start playing",ob_save:"Save",ob_err:"Nickname: 3–16 chars, letters, digits and _",ob_needAvatar:"Pick an avatar: upload a photo or an emoji",profile_edit:"✏️ Edit profile",app_pm:"Players market",soon:"(coming soon)",pm_toast:"Coming soon!",
+ wipe_done:"There was a wipe: all progress is reset. Start over!",
+ ev_news:"📢 News",ev_ok:"Got it",ev_gift:"🎁 Gift: {p}",ev_phone:"📱 Gift: a phone",ev_demand:"🔥 Demand ×{v}",ev_disc:"🏷 {v}% off purchases",
+ conds:["Broken","Poor","Good","Mint"]}
+};
+const LANGS = {ru:"🇷🇺 RU",uk:"🇺🇦 UK",kk:"🇰🇿 KK",en:"🇬🇧 EN"};
+
+/* ---------- случайность и состояние ---------- */
+const rnd = n => Math.floor(Math.random()*n);
+const between = (a,b) => a + rnd(b-a+1);
+const pick = arr => arr[rnd(arr.length)];
+const esc = s => String(s==null?"":s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+// язык берётся из Телеграма пользователя; незнакомые языки -> английский
+function detectLang(){
+  let c = "en";
+  try { c = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.language_code) || navigator.language || "en"; } catch(e){}
+  c = String(c).slice(0,2).toLowerCase();
+  if (c === "be") c = "ru";
+  return I[c] ? c : "en";
+}
+function mkListing(S){
+  const m = rnd(PHONES.length-1), c = rnd(4);
+  const base = PHONES[m][1]*COND[c];
+  const ask = Math.max(5, Math.round(base*(0.8+Math.random()*0.35)));
+  const min = Math.max(3, Math.round(ask*(0.78+Math.random()*0.17)));
+  return {id:S.nextId++, m, c, ask, min, seller:pick(NAMES), bat:between(BAT[c][0],BAT[c][1]),
+    gb:pick([64,128,256]), imei:String(1e14+Math.floor(Math.random()*9e14)), seed:rnd(1e9),
+    chat:{msgs:[], price:ask, patience:3, state:"idle"}, insp:{}};
+}
+function rollDay(S, first){
+  if (!first) S.day++;
+  S.demand = Math.round((0.8+Math.random()*0.5)*100)/100;
+  S.listings = [];
+  for (let i=0;i<8;i++) S.listings.push(mkListing(S));
+}
+function fresh(lang, keepSet){
+  const S = {lang:lang||detectLang(), langSet:!!keepSet, money:START_MONEY, day:1, demand:1, inv:[], listings:[], inf:false, nextId:1, seen:{}, wipes:{}, profile:null, lastActive:Date.now()};
+  rollDay(S,true);
+  return S;
+}
+function load(){
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (raw){
+      const s = JSON.parse(raw);
+      if (s && Array.isArray(s.inv) && Array.isArray(s.listings) && I[s.lang]){
+        s.seen = s.seen || {}; s.wipes = s.wipes || {};
+        if (!s.langSet) s.lang = detectLang();   // пока язык не выбран вручную, следуем языку Телеграма
+        return s;
+      }
+    }
+  } catch(e){}
+  return fresh();
+}
+function save(){ S.lastActive = Date.now(); try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch(e){} }
+
+let S = load();
+const PREV_ACTIVE = S.lastActive || 0;   // когда игрок был в игре в прошлый раз (нужно для вайпа)
+let nav = {view:"home"};
+let stack = [];
+let askReset = false;
+let askWipe = false, wipePreset = null;
+let modal = null;
+
+/* ---------- помощники ---------- */
+const $app = document.getElementById("app");
+const $toast = document.getElementById("toast");
+let toastTimer;
+function toast(msg){
+  $toast.textContent = msg; $toast.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>$toast.classList.remove("show"), 2200);
+}
+function t(k, v){
+  let s = (I[S.lang] && I[S.lang][k] !== undefined) ? I[S.lang][k] : I.ru[k];
+  if (typeof s === "string" && v) for (const x in v) s = s.split("{"+x+"}").join(v[x]);
+  return s;
+}
+// деньги внутри игры в $, на экране — в валюте языка
+function fmt(n){
+  const c = CUR[S.lang] || CUR.en;
+  const v = Math.round(n*c.r).toLocaleString("en-US");
+  return c.r === 1 ? "$"+v : v.replace(/,/g," ")+" "+c.s;
+}
+const moneyStr = () => S.inf ? "∞" : fmt(S.money);
+const pname = it => PHONES[it.m][0];
+
+/* ---------- события от владельца ---------- */
+let EVPOSTS = [];
+// длительность события считается от момента, когда игрок его получил (иначе короткие события терялись бы)
+const RECV = {};
+const rk = p => p.id+"~"+(p.rev||0);
+const isActive = p => {
+  if (!p || !p.on) return false;
+  if (RECV[rk(p)] && p.secs > 0) return Date.now() < RECV[rk(p)] + p.secs*1000;
+  return !p.until || Date.parse(p.until) > Date.now();
+};
+// Событие «только для тех, кто в игре»: тем, кто открыл игру уже после запуска, оно не достаётся
+let baseline = new Set(), baselineSet = false;
+const eligible = p => p.online !== true || !baseline.has(p.id);
+const active = () => EVPOSTS.filter(p => isActive(p) && eligible(p));
+const dm = () => active().reduce((m,p)=>p.effect==="demand" ? m*(+p.value||1) : m, 1);
+const pm = () => active().reduce((m,p)=>p.effect==="discount" ? m*(1-Math.min(90,+p.value||0)/100) : m, 1);
+const demandNow = () => Math.round(S.demand*dm()*100)/100;
+const bf = x => fmt(x*pm());                       // цена покупки со скидкой события
+const ptext = p => { const x = p.text||{}; return x[S.lang]||x.ru||x.en||x.uk||x.kk||""; };
+
+const sellPrice = it => Math.floor(PHONES[it.m][1]*COND[it.c]*demandNow()*(0.9+0.1*(it.bat||85)/100));
+const findL = id => S.listings.find(l=>l.id===id);
+const findP = id => S.inv.find(p=>p.id===id);
+
+function playFx(name, secs){
+  if (!name || name==="none") return;
+  const dur = (secs>0 ? secs : 6)*1000;
+  if (name === "disco"){ document.body.classList.add("disco"); setTimeout(()=>document.body.classList.remove("disco"), dur); return; }
+  const em = name==="rain" ? ["🪙","💸","📱","💰"] : ["🎉","🎊","✨","🥳"];
+  const box = document.createElement("div"); box.className = "fx"; document.body.appendChild(box);
+  const end = Date.now()+dur;
+  const spawn = ()=>{
+    for (let i=0;i<6;i++){
+      const sp = document.createElement("span"); sp.textContent = pick(em);
+      sp.style.left = Math.random()*100+"%"; sp.style.fontSize = (20+Math.random()*24)+"px";
+      sp.style.animationDuration = (2+Math.random()*3)+"s"; box.appendChild(sp); setTimeout(()=>sp.remove(), 5500);
+    }
+    if (Date.now() < end) setTimeout(spawn, 350); else setTimeout(()=>box.remove(), 6000);
+  };
+  spawn();
+}
+function queuePosts(){
+  if (modal || !S.profile) return;
+  const p = active().find(x=>!S.seen[x.id] && x.effect!=="wipe");
+  if (p){ modal = p; playFx(p.fx, p.secs); }
+}
+function effLine(p){
+  if (p.effect==="gift") return `<div class="pill">${t("ev_gift",{p:fmt(+p.value||0)})}</div>`;
+  if (p.effect==="phone") return `<div class="pill">${t("ev_phone")}</div>`;
+  if (p.effect==="demand") return `<div class="pill">${t("ev_demand",{v:+p.value||1})}</div>`;
+  if (p.effect==="discount") return `<div class="pill">${t("ev_disc",{v:+p.value||0})}</div>`;
+  return "";
+}
+let lastSig = "";
+async function pullEvents(){
+  const url = LIVE_URL ? LIVE_URL.replace(/\/$/,"")+"/live.json" : "events.json";
+  try {
+    const r = await fetch(url+"?t="+Date.now(), {cache:"no-store"});
+    if (!r.ok) return;
+    const j = await r.json();
+    EVPOSTS = (j && Array.isArray(j.posts)) ? j.posts : [];
+    if (!baselineSet){ EVPOSTS.forEach(p=>baseline.add(p.id)); baselineSet = true; }
+    EVPOSTS.forEach(p=>{ if (!baseline.has(p.id) && !RECV[rk(p)]) RECV[rk(p)] = Date.now(); });
+    checkWipes();   // всё, что уже было при входе
+    queuePosts();
+    const sig = JSON.stringify(active().map(p=>p.id+p.on))+(modal?modal.id:"");
+    if (sig !== lastSig){ lastSig = sig; render(); }
+  } catch(e){}
+}
+
+/* ---------- профиль ---------- */
+const EMOJIS = ["🦊","🐼","🐯","🦁","🐸","🐵","🦄","🐲","🤖","👾","😎","🔥"];
+let OB = {nick:"", avatar:"", err:""};
+function tgUser(){ try { return (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) || {}; } catch(e){ return {}; } }
+function startOnboard(edit){
+  const u = tgUser();
+  OB = {nick: (edit && S.profile) ? S.profile.nick : String(u.username||"").slice(0,16), avatar: (edit && S.profile) ? S.profile.avatar : "", err:""};
+}
+function avatarHTML(av, size){
+  const st = `width:${size}px;height:${size}px;font-size:${Math.round(size*0.55)}px`;
+  if (av && (av.startsWith("data:") || av.startsWith("http"))) return `<img class="avatar" style="${st}" src="${esc(av)}" alt="">`;
+  if (av && av.startsWith("emoji:")) return `<span class="avatar" style="${st}">${av.slice(6)}</span>`;
+  return `<span class="avatar" style="${st}">👤</span>`;
+}
+const nickOk = n => /^[\p{L}\d_]{3,16}$/u.test(n);
+function handleFile(f){
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = ()=>{
+    const im = new Image();
+    im.onload = ()=>{
+      const c = document.createElement("canvas"); c.width = c.height = 160;
+      const g = c.getContext("2d"), m = Math.min(im.width, im.height);
+      g.drawImage(im, (im.width-m)/2, (im.height-m)/2, m, m, 0, 0, 160, 160);
+      OB.avatar = c.toDataURL("image/jpeg", 0.82); render();
+    };
+    im.src = r.result;
+  };
+  r.readAsDataURL(f);
+}
+
+/* ---------- ВАЙП ---------- */
+let wipeRun = false;
+function doWipe(id){
+  const keep = {seen:S.seen||{}, wipes:S.wipes||{}, profile:S.profile||null}; keep.wipes[id] = true;
+  S = fresh(S.lang, S.langSet); S.seen = keep.seen; S.wipes = keep.wipes; S.profile = keep.profile;   // язык сохраняем, остальное с нуля
+  stack = []; nav = {view:"home"}; modal = null; save();
+}
+function startWipe(p, preview){
+  if (wipeRun) return; wipeRun = true;
+  const el = document.createElement("div"); el.id = "wipe";
+  el.innerHTML = `<div class="wtop">${t("wipe_title")}</div><div class="wnum"></div>`;
+  document.body.appendChild(el);
+  const num = el.querySelector(".wnum"); let n = 10;
+  try { tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred("warning"); } catch(e){}
+  const boom = ()=>{
+    el.className = "boom"; num.textContent = "💥"; el.querySelector(".wtop").textContent = t("wipe_boom");
+    document.body.classList.add("shake");
+    try { tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred("error"); } catch(e){}
+    setTimeout(()=>{
+      document.body.classList.remove("shake"); el.remove(); wipeRun = false;
+      if (preview){ S.wipes[p.id] = true; save(); }      // у владельца только показ, прогресс не стирается
+      else { doWipe(p.id); toast(t("wipe_done")); }
+      render();
+    }, 2200);
+  };
+  const tick = ()=>{
+    num.textContent = n; el.classList.toggle("red", n <= 5);   // 10-6 просто счёт, 5-0 всё красное
+    if (n > 0){ n--; setTimeout(tick, 1000); } else setTimeout(boom, 1000);
+  };
+  tick();
+}
+function checkWipes(){
+  if (wipeRun) return;
+  for (const p of EVPOSTS){
+    if (p.effect !== "wipe" || !p.on || S.wipes[p.id]) continue;
+    if (baseline.has(p.id)){          // вайп был, пока игрока не было в игре: стираем при входе
+      if ((p.at||0) > PREV_ACTIVE){ doWipe(p.id); render(); toast(t("wipe_done")); }
+      else { S.wipes[p.id] = true; save(); }
+    } else { startWipe(p, false); return; }   // вайп запущен при игроке: отсчёт 10 секунд
+  }
+}
+
+function go(v, extra){ stack.push(Object.assign({}, nav)); nav = Object.assign({}, nav, {view:v}, extra||{}); }
+function back(){ nav = stack.pop() || {view:"home"}; }
+function home(){ stack = []; nav = {view:"home"}; }
+
+/* ---------- рисунки телефонов ---------- */
+// Дизайн каждой модели: вырез экрана, камера на задней панели, цвета корпуса и обои
+const SPEC = {
+ "iPhone 11":{fr:"notch",bk:"sq2",body:"#cfc3e6",frame:"#b5a9cc",wall:["#7a5cff","#ff7ab6"]},
+ "iPhone 12":{fr:"notch",bk:"diag2",body:"#27364f",frame:"#a3adbd",wall:["#3a7bd5","#00d2ff"]},
+ "iPhone 13":{fr:"notch",bk:"diag2",body:"#f0d6d3",frame:"#d6bfbc",wall:["#ff9a9e","#fad0c4"]},
+ "iPhone 14":{fr:"notch",bk:"diag2",body:"#3a3f63",frame:"#aab0c6",wall:["#614385","#516395"]},
+ "iPhone 15 Pro":{fr:"island",bk:"sq3",body:"#7d7a75",frame:"#9b9892",wall:["#f6d365","#fda085"]},
+ "Galaxy A54":{fr:"hole",bk:"vert3",body:"#b3a3e6",frame:"#9d8dd0",wall:["#a18cd1","#fbc2eb"]},
+ "Galaxy S21":{fr:"hole",bk:"contour3",body:"#c4a0d3",frame:"#b08cc0",wall:["#f093fb","#f5576c"]},
+ "Galaxy S23":{fr:"hole",bk:"vert3",body:"#2b3a35",frame:"#c3c8c3",wall:["#43e97b","#38f9d7"]},
+ "Pixel 7":{fr:"hole",bk:"bar2",body:"#e6e9e6",frame:"#c8cdd0",wall:["#f6d365","#fda085"]},
+ "Pixel 8":{fr:"hole",bk:"bar2",body:"#3a3d40",frame:"#b6bbbf",wall:["#4facfe","#00f2fe"]},
+ "Redmi Note 12":{fr:"hole",bk:"sqR",body:"#2a6cb0",frame:"#1f5489",wall:["#6dd5ed","#2193b0"]},
+ "Xiaomi 13":{fr:"hole",bk:"sqBig",body:"#1c1c1f",frame:"#c9b27a",wall:["#667eea","#764ba2"]},
+ "OnePlus 11":{fr:"hole",bk:"circ",body:"#1e5c4b",frame:"#2c7a64",wall:["#11998e","#38ef7d"]},
+ "OnePlus 15":{fr:"hole",bk:"sqOp",body:"#15161a",frame:"#3a3c44",wall:["#ff512f","#dd2476"]},
+ "Nothing Phone 2":{fr:"hole",bk:"glyph",body:"#e9eaec",frame:"#c9ccd1",wall:["#232526","#414345"]},
+ "🧪 Test Phone":{fr:"hole",bk:"sq3",body:"#6a2bd9",frame:"#8f5cf0",wall:["#ff00cc","#3333ff"]}
+};
+const specOf = m => SPEC[PHONES[m][0]] || SPEC["🧪 Test Phone"];
+// Настоящие фото моделей: "OnePlus 15": ["op15/1.jpg","op15/2.jpg","op15/3.jpg"]; если пусто — рисуется картинка
+const REAL = {};
+// Фото, которые лежат в галерее каждого телефона вместе со снимками самого телефона
+const GALLERY_EXTRA = ["gallery/egg.jpg"];
+function photo(it, k){
+  const r = REAL[pname(it)];
+  return r && r[k] ? `<img src="${esc(r[k])}" alt="">` : phoneSvg(it, k);
+}
+
+function cracks(R, c, x0, y0, w, h){
+  let s = "";
+  if (c === 0){
+    const ox = x0+w*(0.3+R()*0.4), oy = y0+h*(0.3+R()*0.4);
+    for (let i=0;i<10;i++){
+      const a = R()*Math.PI*2, len = 25+R()*80;
+      const mx = ox+Math.cos(a)*len*0.5+(R()-0.5)*8, my = oy+Math.sin(a)*len*0.5+(R()-0.5)*8;
+      const ex = ox+Math.cos(a)*len, ey = oy+Math.sin(a)*len;
+      s += `<polyline points="${ox},${oy} ${mx},${my} ${ex},${ey}" fill="none" stroke="#fff" stroke-opacity=".85" stroke-width=".9"/>`;
+    }
+    s += `<circle cx="${ox}" cy="${oy}" r="3" fill="#fff" fill-opacity=".5"/>`;
+  } else if (c === 1){
+    for (let i=0;i<4;i++){
+      const x = x0+R()*w*0.8, y = y0+R()*h*0.8;
+      s += `<line x1="${x}" y1="${y}" x2="${x+10+R()*18}" y2="${y+R()*14-7}" stroke="#fff" stroke-opacity=".55" stroke-width=".7"/>`;
+    }
+  } else if (c === 2){
+    const x = x0+R()*w*0.6, y = y0+R()*h*0.6;
+    s += `<line x1="${x}" y1="${y}" x2="${x+16}" y2="${y+6}" stroke="#fff" stroke-opacity=".35" stroke-width=".6"/>`;
+  }
+  return s;
+}
+function lens(x, y, r, id){
+  return `<circle cx="${x}" cy="${y}" r="${r}" fill="#a9afb6"/><circle cx="${x}" cy="${y}" r="${r-1.3}" fill="#17171b"/>
+    <circle cx="${x}" cy="${y}" r="${r*0.64}" fill="url(#${id}l)"/><circle cx="${x-r*0.28}" cy="${y-r*0.28}" r="${r*0.2}" fill="#fff" fill-opacity=".8"/>`;
+}
+const mod = (x,y,w,h,rx) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="#0a0a0f" fill-opacity=".4" stroke="#fff" stroke-opacity=".4" stroke-width=".9"/>`;
+
+function frontInner(it, uid){
+  const R = rng(it.seed+1), sp = specOf(it.m);
+  let s = `<defs>
+    <linearGradient id="${uid}w" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${sp.wall[0]}"/><stop offset="1" stop-color="${sp.wall[1]}"/></linearGradient>
+    <linearGradient id="${uid}f" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${sp.frame}"/><stop offset=".5" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="${sp.frame}"/></linearGradient>
+    <linearGradient id="${uid}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <clipPath id="${uid}c"><rect x="11" y="9" width="98" height="202" rx="14"/></clipPath></defs>`;
+  s += `<rect x="3" y="52" width="3" height="16" rx="1.5" fill="${sp.frame}"/><rect x="3" y="74" width="3" height="16" rx="1.5" fill="${sp.frame}"/><rect x="114" y="66" width="3" height="26" rx="1.5" fill="${sp.frame}"/>`;
+  s += `<rect x="5" y="3" width="110" height="214" rx="21" fill="url(#${uid}f)"/><rect x="8" y="6" width="104" height="208" rx="18" fill="#08080b"/>`;
+  s += `<rect x="11" y="9" width="98" height="202" rx="14" fill="url(#${uid}w)"/><g clip-path="url(#${uid}c)">`;
+  s += `<circle cx="92" cy="40" r="46" fill="#fff" fill-opacity=".12"/><circle cx="20" cy="172" r="52" fill="#000" fill-opacity=".14"/>`;
+  s += `<text x="20" y="22" font-size="7" font-family="sans-serif" font-weight="700" fill="#fff">12:30</text>
+    <rect x="86" y="16" width="13" height="6" rx="1.8" fill="none" stroke="#fff" stroke-width=".8"/><rect x="87.3" y="17.3" width="8" height="3.4" rx=".8" fill="#fff"/>
+    <text x="60" y="74" text-anchor="middle" font-size="26" font-family="sans-serif" font-weight="300" fill="#fff">12:30</text>
+    <text x="60" y="86" text-anchor="middle" font-size="6.5" font-family="sans-serif" fill="#fff" fill-opacity=".85">Mon, 9 Nov</text>`;
+  const pal = ["#ff6b6b","#feca57","#48dbfb","#1dd1a1","#5f27cd","#ff9ff3","#54a0ff","#c8d6e5"];
+  for (let r=0;r<3;r++) for (let c=0;c<4;c++) s += `<rect x="${17+c*22}" y="${104+r*26}" width="16" height="16" rx="4.5" fill="${pal[Math.floor(R()*pal.length)]}"/>`;
+  for (let c=0;c<4;c++) s += `<rect x="${17+c*22}" y="188" width="16" height="16" rx="4.5" fill="#fff" fill-opacity=".85"/>`;
+  s += cracks(R, it.c, 11, 9, 98, 202);
+  s += `<polygon points="11,9 84,9 11,100" fill="url(#${uid}g)"${it.c===3?"":' fill-opacity=".6"'}/></g>`;
+  if (sp.fr === "notch") s += `<path d="M42 9 h36 v3 q0 7 -7 7 h-22 q-7 0 -7 -7z" fill="#08080b"/>`;
+  else if (sp.fr === "island") s += `<rect x="45" y="13" width="30" height="9" rx="4.5" fill="#000"/>`;
+  else s += `<circle cx="60" cy="17" r="3.2" fill="#000"/><circle cx="59" cy="16" r="1" fill="#2a3a5a"/>`;
+  return s;
+}
+function backInner(it, uid){
+  const R = rng(it.seed+7), sp = specOf(it.m), id = uid;
+  let s = `<defs>
+    <radialGradient id="${id}l" cx=".4" cy=".4"><stop offset="0" stop-color="#3f4f86"/><stop offset="1" stop-color="#04050c"/></radialGradient>
+    <linearGradient id="${id}s" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".32"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".32"/></linearGradient>
+    <clipPath id="${id}bc"><rect x="7" y="5" width="106" height="210" rx="19"/></clipPath></defs>`;
+  s += `<rect x="3" y="52" width="3" height="16" rx="1.5" fill="${sp.frame}"/><rect x="114" y="66" width="3" height="26" rx="1.5" fill="${sp.frame}"/><rect x="114" y="98" width="3" height="16" rx="1.5" fill="${sp.frame}"/>`;
+  s += `<rect x="5" y="3" width="110" height="214" rx="21" fill="${sp.frame}"/><rect x="7" y="5" width="106" height="210" rx="19" fill="${sp.body}"/>`;
+  s += `<g clip-path="url(#${id}bc)">`;
+  switch (sp.bk){
+    case "sq2": s += mod(14,12,46,46,12)+lens(28,26,8,id)+lens(28,44,8,id)+`<circle cx="49" cy="22" r="3" fill="#f7e9b0"/><circle cx="49" cy="34" r="1.4" fill="#222"/>`; break;
+    case "diag2": s += mod(14,12,46,46,12)+lens(28,26,8.5,id)+lens(46,44,8.5,id)+`<circle cx="47" cy="23" r="3" fill="#f7e9b0"/>`; break;
+    case "sq3": s += mod(14,12,52,52,13)+lens(29,27,8.5,id)+lens(29,48,8.5,id)+lens(50,37,8.5,id)+`<circle cx="53" cy="21" r="2.6" fill="#f7e9b0"/><circle cx="53" cy="53" r="2" fill="#222"/>`; break;
+    case "vert3": s += lens(24,24,8,id)+lens(24,46,8,id)+lens(24,68,8,id)+`<circle cx="44" cy="26" r="3" fill="#f7e9b0"/>`; break;
+    case "contour3": s += `<path d="M7 18 Q7 10 15 10 H66 Q82 10 82 26 V56 Q82 72 66 72 H7 Z" fill="${sp.frame}"/>`+lens(26,27,9,id)+lens(26,53,9,id)+lens(55,40,9,id)+`<circle cx="70" cy="20" r="2.6" fill="#f7e9b0"/>`; break;
+    case "bar2": s += `<rect x="5" y="42" width="110" height="26" fill="#15171b"/><rect x="5" y="42" width="110" height="26" fill="url(#${id}s)" fill-opacity=".6"/>`+lens(38,55,8.5,id)+lens(64,55,8.5,id)+`<circle cx="88" cy="55" r="3.6" fill="#eee"/><circle cx="100" cy="55" r="2" fill="#333"/>`; break;
+    case "sqR": s += mod(10,12,52,52,10)+lens(26,28,8,id)+lens(26,48,8,id)+lens(46,38,8,id)+`<circle cx="52" cy="22" r="2.6" fill="#f7e9b0"/>`; break;
+    case "sqBig": s += mod(10,10,64,64,14)+lens(30,30,12,id)+lens(30,56,12,id)+lens(56,43,12,id)+`<circle cx="66" cy="18" r="3" fill="#f7e9b0"/>`; break;
+    case "circ": s += `<circle cx="42" cy="44" r="32" fill="#0a0a0f" fill-opacity=".45"/><circle cx="42" cy="44" r="32" fill="none" stroke="${sp.frame}" stroke-width="3"/>`+lens(30,32,9,id)+lens(54,32,9,id)+lens(42,56,9,id)+`<circle cx="84" cy="22" r="3" fill="#f7e9b0"/>`; break;
+    case "sqOp": s += mod(10,10,58,58,16)+lens(27,27,9,id)+lens(27,51,9,id)+lens(51,39,9,id)+`<circle cx="57" cy="20" r="2.8" fill="#f7e9b0"/>`; break;
+    case "glyph": s += `<circle cx="60" cy="122" r="30" fill="none" stroke="#9aa0a8" stroke-width="2"/><circle cx="60" cy="122" r="18" fill="none" stroke="#9aa0a8" stroke-width="2"/><circle cx="60" cy="122" r="6" fill="#9aa0a8"/>
+      <path d="M22 168 H98 M22 180 H78" stroke="#b9bec6" stroke-width="2" fill="none"/><path d="M18 92 Q60 80 102 92" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none"/>`+lens(30,28,9,id)+lens(30,50,9,id)+`<circle cx="98" cy="24" r="2" fill="#e33"/>`; break;
+  }
+  s += cracks(R, it.c, 7, 5, 106, 210);
+  s += `<rect x="7" y="5" width="106" height="210" fill="url(#${id}s)"/></g>`;
+  return s;
+}
+function phoneSvg(it, kind){
+  const uid = "p"+it.seed+"k"+kind, head = `<svg viewBox="0 0 120 220" xmlns="http://www.w3.org/2000/svg">`;
+  if (kind === 0) return head + frontInner(it, uid) + `</svg>`;
+  if (kind === 1) return head + backInner(it, uid) + `</svg>`;
+  return head + `<rect width="120" height="220" fill="#00000010"/><ellipse cx="62" cy="206" rx="46" ry="6" fill="#0004"/>
+    <g transform="rotate(-10 60 110) translate(11 12) scale(.82)">${frontInner(it, uid)}</g>
+    <rect x="20" y="184" width="80" height="22" rx="6" fill="#fff"/><text x="60" y="199" text-anchor="middle" font-size="9" font-family="sans-serif" fill="#111" font-weight="700">${pname(it)}</text></svg>`;
+}
+
+/* ---------- панель владельца ---------- */
+let OWPOSTS = [];
+try { OWPOSTS = JSON.parse(localStorage.getItem("owner_posts_v1")||"[]"); } catch(e){}
+let OW = {ru:"",uk:"",kk:"",en:"",effect:"none",value:"",secs:"30",fx:"none",online:LIVE_URL?"1":"0"};
+function owSave(){ try { localStorage.setItem("owner_posts_v1", JSON.stringify(OWPOSTS)); } catch(e){} }
+function owSecret(){ try { return localStorage.getItem("owner_secret")||""; } catch(e){ return ""; } }
+const EFFECTS = [["none","— без эффекта, только сообщение —"],["demand","Спрос ×N (множитель, например 2)"],
+  ["discount","Скидка на покупки, % (например 30)"],["gift","Подарок денег всем, $ (например 1000)"],["phone","Подарок: телефон всем"]];
+const FXS = [["none","без анимации"],["rain","🪙 дождь из денег"],["confetti","🎉 конфетти"],["disco","🕺 диско"]];
+const PRESETS = [
+ {label:"💰 +$1000 всем",effect:"gift",value:1000,secs:0,fx:"rain",
+  text:{ru:"Дождь из денег! Админ дарит каждому игроку подарок 🎁",uk:"Грошовий дощ! Адмін дарує кожному гравцю подарунок 🎁",kk:"Ақша жаңбыры! Админ әр ойыншыға сыйлық береді 🎁",en:"Money rain! The admin is giving every player a gift 🎁"}},
+ {label:"🔥 Спрос ×2 (1 ч)",effect:"demand",value:2,secs:3600,fx:"confetti",
+  text:{ru:"Ажиотаж! Все хотят телефоны: цены продажи ×2 на час 🔥",uk:"Ажіотаж! Усі хочуть телефони: ціни продажу ×2 на годину 🔥",kk:"Ажиотаж! Бәрі телефон сатып алғысы келеді: сату бағасы ×2, 1 сағат 🔥",en:"Hype! Everyone wants phones: sell prices ×2 for an hour 🔥"}},
+ {label:"🏷 Скидка 50% (1 ч)",effect:"discount",value:50,secs:3600,fx:"confetti",
+  text:{ru:"Чёрная пятница! Скидка 50% на покупку телефонов на час 🏷",uk:"Чорна п'ятниця! Знижка 50% на купівлю телефонів на годину 🏷",kk:"Қара жұма! Телефон сатып алуға 50% жеңілдік, 1 сағат 🏷",en:"Black Friday! 50% off buying phones for an hour 🏷"}},
+ {label:"📱 Телефон всем",effect:"phone",value:0,secs:0,fx:"rain",
+  text:{ru:"Дождь из телефонов! Каждый игрок получает телефон 📱",uk:"Дощ із телефонів! Кожен гравець отримує телефон 📱",kk:"Телефон жаңбыры! Әр ойыншы телефон алады 📱",en:"Phone rain! Every player gets a phone 📱"}},
+ {label:"💥 ВАЙП (сброс у всех)",effect:"wipe",value:0,secs:0,fx:"none",online:false,
+  text:{ru:"ВАЙП!!!",uk:"ВАЙП!!!",kk:"ВАЙП!!!",en:"WIPE!!!"}},
+ {label:"🕺 Диско",effect:"none",value:0,secs:15,fx:"disco",
+  text:{ru:"Админ включил диско! 🕺🪩",uk:"Адмін увімкнув диско! 🕺🪩",kk:"Админ диско қосты! 🕺🪩",en:"The admin turned on disco! 🕺🪩"}}
+];
+function mkPost(o){
+  const secs = Math.max(0, +o.secs || 0);
+  return {id:"p"+Date.now()+rnd(999), at:Date.now(), on:true, text:o.text, effect:o.effect||"none", value:+o.value||0, secs,
+    fx:o.fx||"none", online: o.online===undefined ? !!LIVE_URL : !!o.online,
+    until: secs>0 ? new Date(Date.now()+secs*1000).toISOString() : null};
+}
+// свои события владелец не получает окном (чтобы не мешало панели), но анимацию видит сразу
+function owPush(p){ OWPOSTS.push(p); S.seen[p.id] = true; save(); playFx(p.fx, p.secs); }
+async function publish(){
+  OWPOSTS = OWPOSTS.slice(-20); owSave();
+  if (!LIVE_URL){ toast("JSON обновлён внизу страницы"); return; }
+  const sec = owSecret();
+  if (!sec){ toast("Сначала введи секрет базы"); return; }
+  try {
+    const r = await fetch(LIVE_URL.replace(/\/$/,"")+"/live.json?auth="+encodeURIComponent(sec),
+      {method:"PUT", body:JSON.stringify({v:1,posts:OWPOSTS})});
+    toast(r.ok ? "✅ Опубликовано для всех" : "❌ Ошибка "+r.status);
+    if (r.ok) pullEvents();
+  } catch(e){ toast("❌ Нет связи с базой"); }
+}
+function owJson(){ return JSON.stringify({v:1,posts:OWPOSTS}, null, 1); }
+
+/* ---------- экраны ---------- */
+const V = {};
+V.home = ()=>{
+  const chats = S.listings.filter(l=>l.chat.msgs.length).length;
+  const apps = [["ads","🛒","#2f7df6",0],["chats","💬","#1f9d55",chats],["stock","🎒","#e8833a",S.inv.length],
+                ["profile","👤","#8a5cf6",0],["settings","⚙️","#6b7480",0]];
+  const ev = active().filter(p=>p.effect==="demand"||p.effect==="discount")
+    .map(p=>`<div class="evb">${t(p.effect==="demand"?"ev_demand":"ev_disc",{v:+p.value})}</div>`).join("");
+  return ev + `<div class="home">${apps.map(([v,ic,col,n])=>`<button class="app" data-act="go" data-v="${v}">
+    <div class="ic" style="background:${col}">${ic}</div>${t("app_"+v)}
+    ${n?`<span class="badge">${n}</span>`:""}</button>`).join("")}
+    <button class="app soon" data-act="soon"><div class="ic" style="background:#8a8f98">🌐</div>${t("app_pm")}<small>${t("soon")}</small></button></div>`;
+};
+V.ads = ()=>{
+  let h = `<h2>${t("adsTitle")}</h2><p class="hint">${t("adsHint")}</p>`;
+  if (!S.listings.length) return h + `<p class="empty">${t("adsEmpty")}</p>`;
+  S.listings.forEach(l=>{
+    h += `<button class="card" data-act="go" data-v="listing" data-lid="${l.id}"><div class="thumb">${phoneSvg(l,0)}</div>
+      <div class="ct"><div class="nm">${pname(l)}</div><div class="sub">${t("conds")[l.c]} · ${l.gb} GB · ${l.seller}</div></div>
+      <div class="nm">${bf(l.ask)}</div></button>`;
+  });
+  return h;
+};
+V.listing = ()=>{
+  const l = findL(nav.lid); if (!l) return `<p class="empty">—</p>`;
+  const has = l.chat.msgs.length;
+  return `<div class="photos big">${[0,1,2].map(k=>photo(l,k)).join("")}</div>
+    <h2>${pname(l)}</h2>
+    <div class="row"><span>${t("ask")}</span><b>${bf(l.ask)}</b></div>
+    <div class="row"><span>${t("condition")}</span><b>${t("conds")[l.c]}</b></div>
+    <div class="row"><span>${t("storage")}</span><b>${l.gb} GB</b></div>
+    <div class="row"><span>${t("seller")}</span><b>${l.seller}</b></div>
+    <div style="height:16px"></div>
+    <button class="btn wide" data-act="chat" data-lid="${l.id}">${has?t("openChat"):t("write")}</button>`;
+};
+V.chats = ()=>{
+  const list = S.listings.filter(l=>l.chat.msgs.length);
+  let h = `<h2>${t("chatsTitle")}</h2>`;
+  if (!list.length) return h + `<p class="empty">${t("noChats")}</p>`;
+  list.forEach(l=>{
+    const last = l.chat.msgs[l.chat.msgs.length-1];
+    h += `<button class="card" data-act="chat" data-lid="${l.id}"><div class="thumb">${phoneSvg(l,0)}</div>
+      <div class="ct"><div class="nm">${l.seller} · ${pname(l)}</div><div class="sub">${esc(last.text)}</div></div></button>`;
+  });
+  return h;
+};
+V.chat = ()=>{
+  const l = findL(nav.lid); if (!l) return `<p class="empty">—</p>`;
+  const ch = l.chat;
+  let rep = "";
+  if (ch.state === "closed") rep = `<div class="note" style="grid-column:1/-1">${t("closedNote")}</div>`;
+  else if (ch.state === "agreed") rep = `<button class="btn full" data-act="go" data-v="meet" data-lid="${l.id}">${t("goMeet")}</button>
+      <button class="btn ghost full" data-act="c" data-a="bye">${t("q_bye")}</button>`;
+  else {
+    if (ch.state === "idle") rep += `<button class="btn full" data-act="c" data-a="hello">${t("q_hello")}</button>`;
+    rep += `<button class="btn" data-act="c" data-a="photos">${t("q_photos")}</button>
+      <button class="btn" data-act="c" data-a="cond">${t("q_cond")}</button>`;
+    [0.9,0.8,0.7].forEach(f=>{ rep += `<button class="btn ghost" data-act="c" data-a="haggle" data-f="${f}">${t("q_haggle",{p:bf(ch.price*f)})}</button>`; });
+    rep += `<button class="btn" data-act="c" data-a="meet">${t("q_meet")}</button>
+      <button class="btn ghost" data-act="c" data-a="bye">${t("q_bye")}</button>`;
+  }
+  const msgs = ch.msgs.map(m=>`<div class="bubble ${m.from==="me"?"me":"sel"}">${esc(m.text)}${m.photos?`<div class="photos">${[0,1,2].map(k=>photo(l,k)).join("")}</div>`:""}</div>`).join("");
+  return `<div class="chathead"><b>${l.seller} · ${pname(l)}</b><b>${t("chatPrice")}: ${bf(ch.price)}</b></div>
+    <div class="replies">${rep}</div><div class="msgs" id="msgs">${msgs}</div>`;
+};
+V.meet = ()=>{
+  const l = findL(nav.lid); if (!l) return `<p class="empty">—</p>`;
+  const ins = l.insp || {};
+  const res = [];
+  if (ins.screen) res.push(t("r_screen")[l.c]);
+  if (ins.bat) res.push(t("r_bat",{b:l.bat}));
+  if (ins.imei) res.push(t("r_imei"));
+  if (ins.photo) res.push(t("r_photo"));
+  return `<div class="scene"><b>${pname(l)}</b><div class="sub">${t("meetIntro",{n:l.seller})}</div></div>
+    <div class="photos big">${[0,1,2].map(k=>photo(l,k)).join("")}</div>
+    <div class="insp"><button class="btn" data-act="insp" data-k="screen">${t("i_screen")}</button>
+      <button class="btn" data-act="insp" data-k="bat">${t("i_bat")}</button>
+      <button class="btn" data-act="insp" data-k="imei">${t("i_imei")}</button>
+      <button class="btn" data-act="insp" data-k="photo">${t("i_photo")}</button></div>
+    ${res.map(r=>`<div class="res">${r}</div>`).join("")}
+    <div style="height:8px"></div>
+    <button class="btn wide" data-act="buy" data-lid="${l.id}">${t("buyFor",{p:bf(l.chat.price)})}</button>
+    <button class="btn ghost wide" data-act="leave">${t("leave")}</button>`;
+};
+V.stock = ()=>{
+  let h = `<h2>${t("stockTitle")}</h2><p class="hint">${t("stockHint")}</p>`;
+  if (!S.inv.length) return h + `<p class="empty">${t("stockEmpty")}</p>`;
+  h += `<button class="btn wide" data-act="sellall">${t("sellAll")}</button>`;
+  S.inv.forEach(p=>{
+    h += `<div class="card"><div class="thumb">${phoneSvg(p,0)}</div>
+      <div class="ct"><div class="nm">${pname(p)}</div><div class="sub">${t("conds")[p.c]} · 🔋${p.bat}% · ${fmt(sellPrice(p))}</div></div>
+      <div class="btns"><button class="btn small" data-act="go" data-v="phone" data-pid="${p.id}">${t("open")}</button>
+      <button class="btn small ghost" data-act="sell" data-pid="${p.id}">${t("sell")}</button></div></div>`;
+  });
+  return h;
+};
+V.phone = ()=>{
+  const p = findP(nav.pid); if (!p) return `<p class="empty">—</p>`;
+  const W = specOf(p.m).wall;
+  return `<div class="frame" style="background:linear-gradient(160deg,${W[0]},${W[1]})">
+      <div class="clock">12:30</div>
+      <div class="home">
+        <button class="app" data-act="go" data-v="settings" data-dev="${p.id}"><div class="ic" style="background:#6b7480">⚙️</div>${t("app_settings")}</button>
+        <button class="app" data-act="go" data-v="gallery" data-pid="${p.id}"><div class="ic" style="background:#e8833a">🖼</div>${t("gallery")}</button>
+        <button class="app" data-act="home"><div class="ic" style="background:#2f7df6">🎮</div>${t("gameApp")}</button>
+      </div></div>
+    <h2>${pname(p)}</h2>
+    <div class="row"><span>${t("condition")}</span><b>${t("conds")[p.c]}</b></div>
+    <div class="row"><span>${t("worth")}</span><b>${fmt(sellPrice(p))}</b></div>
+    <div style="height:14px"></div>
+    <button class="btn wide" data-act="sell" data-pid="${p.id}">${t("sellFor",{p:fmt(sellPrice(p))})}</button>`;
+};
+V.gallery = ()=>{
+  const p = findP(nav.pid); if (!p) return `<p class="empty">—</p>`;
+  const extra = GALLERY_EXTRA.map(u=>`<img src="${esc(u)}" alt="">`).join("");
+  return `<h2>${t("galleryTitle")}</h2><div class="photos big" style="flex-wrap:wrap;overflow:visible">${[0,1,2].map(k=>photo(p,k)).join("")}${extra}</div>`;
+};
+V.onboard = ()=>{
+  const u = tgUser(), first = !S.profile;
+  return `<div style="text-align:center;padding-top:${first?24:0}px">
+    <h2>${t(first?"ob_title":"profile_edit")}</h2>
+    <div style="margin:16px 0">${avatarHTML(OB.avatar,110)}</div>
+    <button class="btn wide" data-act="ob_pick">${t("ob_upload")}</button>
+    <input type="file" id="obFile" accept="image/*" style="display:none">
+    ${u.photo_url?`<button class="btn ghost wide" data-act="ob_tg">${t("ob_tg")}</button>`:""}
+    <p class="hint">${t("ob_emoji")}</p>
+    <div class="emojis">${EMOJIS.map(e=>`<button class="${OB.avatar==="emoji:"+e?"on":""}" data-act="ob_emoji" data-e="${e}">${e}</button>`).join("")}</div>
+    <label class="t" style="text-align:left">${t("ob_nick")}</label>
+    <input type="text" data-ob="nick" maxlength="16" placeholder="${t("ob_nickPh")}" value="${esc(OB.nick)}" autocomplete="off" autocapitalize="off" spellcheck="false">
+    ${OB.err?`<div class="res" style="color:var(--bad)">${esc(OB.err)}</div>`:""}
+    <button class="btn wide" data-act="ob_save">${t(first?"ob_start":"ob_save")}</button></div>`;
+};
+V.profile = ()=>{
+  const value = S.inv.reduce((a,it)=>a+sellPrice(it),0);
+  return `<div style="text-align:center;margin-bottom:10px">${avatarHTML(S.profile&&S.profile.avatar,96)}<h2>@${esc(S.profile&&S.profile.nick)}</h2></div>
+    <button class="btn ghost wide" data-act="edit_profile">${t("profile_edit")}</button>
+    <div class="row"><span>${t("day")}</span><b>${S.day}</b></div>
+    <div class="row"><span>${t("money")}</span><b>${moneyStr()}</b></div>
+    <div class="row"><span>${t("demand")}</span><b>×${demandNow()}</b></div>
+    <div class="row"><span>${t("count")}</span><b>${S.inv.length}</b></div>
+    <div class="row"><span>${t("stockValue")}</span><b>${fmt(value)}</b></div>`;
+};
+V.settings = ()=>{
+  const dev = nav.dev ? findP(nav.dev) : null;
+  let info = "";
+  if (dev) info = `<h2>${t("deviceInfo")}</h2>
+    <div class="row"><span>${t("model")}</span><b>${pname(dev)}</b></div>
+    <div class="row"><span>${t("condition")}</span><b>${t("conds")[dev.c]}</b></div>
+    <div class="row"><span>${t("battery")}</span><b>${dev.bat}%</b></div>
+    <div class="row"><span>${t("storage")}</span><b>${dev.gb} GB</b></div>
+    <div class="row"><span>${t("imei")}</span><b>${dev.imei}</b></div>
+    <div class="row"><span>${t("paid")}</span><b>${fmt(dev.paid||0)}</b></div>
+    <div style="height:16px"></div>`;
+  const seg = Object.keys(LANGS).map(l=>`<button class="btn ${S.lang===l?"":"ghost"}" data-act="lang" data-l="${l}">${LANGS[l]} ${CUR[l].s}</button>`).join("");
+  return info + `<h2>${t("settingsTitle")}</h2>
+    <label class="t">${t("language")}</label><div class="seg">${seg}</div>
+    <label class="t">${t("promo")}</label>
+    <input type="text" id="promoIn" placeholder="${t("promoPh")}" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <button class="btn wide" data-act="promo">${t("apply")}</button>
+    <div style="height:10px"></div>
+    <button class="btn danger wide" data-act="resetask">${t("reset")}</button>`;
+};
+V.admin = ()=>`<h2>${t("adminTitle")}<span class="tag">TEST</span></h2>
+    <p class="hint">${t("money")}: ${moneyStr()} · ${t("inf")}: ${S.inf?t("on"):t("off")}</p>
+    <button class="btn wide" data-act="adm" data-a="all">📦 ${t("giveAll")}</button>
+    <button class="btn wide" data-act="adm" data-a="inf">♾ ${t("inf")}: ${S.inf?t("on"):t("off")}</button>
+    <button class="btn wide" data-act="adm" data-a="cash">➕ ${t("cash")}</button>
+    <button class="btn ghost wide" data-act="back">${t("close")}</button>`;
+V.owner = ()=>{
+  const live = !!LIVE_URL;
+  let h = `<h2>👑 Панель владельца</h2>
+    <p class="hint">${live ? "Режим LIVE: событие появляется у всех игроков примерно за 5 секунд." : "Режим «файл»: скопируй JSON внизу в файл events.json и загрузи сайт заново."}</p>`;
+  if (live){
+    h += owSecret()
+      ? `<div class="res">✅ Секрет базы сохранён на этом устройстве</div><button class="btn ghost wide" data-act="ow_secretclear">Сменить секрет</button>`
+      : `<label class="t">Секрет базы (Firebase)</label><input type="password" id="owSecret" placeholder="вставь секрет" autocomplete="off">
+         <button class="btn wide" data-act="ow_secret">Сохранить секрет</button>`;
+  }
+  h += `<label class="t">⚡ Быстрые события (жми и сразу у всех)</label>` +
+    PRESETS.map((p,i)=>`<button class="btn wide" data-act="ow_preset" data-i="${i}">${p.label}</button>`).join("");
+  h += `<label class="t">✍️ Своё событие или сообщение</label>
+    <textarea data-ow="ru" placeholder="Текст (RU)">${esc(OW.ru)}</textarea>
+    <textarea data-ow="uk" placeholder="Текст (UK), можно пусто">${esc(OW.uk)}</textarea>
+    <textarea data-ow="kk" placeholder="Текст (KK), можно пусто">${esc(OW.kk)}</textarea>
+    <textarea data-ow="en" placeholder="Text (EN), можно пусто">${esc(OW.en)}</textarea>
+    <select data-ow="effect">${EFFECTS.map(([k,l])=>`<option value="${k}" ${OW.effect===k?"selected":""}>${l}</option>`).join("")}</select>
+    <input type="text" data-ow="value" inputmode="decimal" placeholder="Число для эффекта (2 / 30 / 1000)" value="${esc(OW.value)}">
+    <input type="text" data-ow="secs" inputmode="numeric" placeholder="Сколько секунд длится (0 = без конца)" value="${esc(OW.secs)}">
+    <select data-ow="fx">${FXS.map(([k,l])=>`<option value="${k}" ${OW.fx===k?"selected":""}>${l}</option>`).join("")}</select>
+    <select data-ow="online"><option value="1" ${OW.online==="1"?"selected":""}>Кому: только тем, кто сейчас в игре</option>
+      <option value="0" ${OW.online==="0"?"selected":""}>Кому: всем, и кто зайдёт позже тоже</option></select>
+    <button class="btn wide" data-act="ow_add">🚀 Опубликовать</button>`;
+  if (OWPOSTS.length){
+    h += `<label class="t">📋 Опубликованные</label>` + OWPOSTS.slice().reverse().map(p=>{
+      const tx = (p.text && (p.text.ru||p.text.en||p.text.uk||p.text.kk)) || "—";
+      return `<div class="card"><div class="ct"><div class="nm">${esc(tx)}</div>
+        <div class="sub">${esc(p.effect)}${p.value?" "+esc(p.value):""} · ${p.on?"ВКЛ":"ВЫКЛ"}${p.until?" · до "+esc(new Date(p.until).toLocaleString()):""}</div></div>
+        <div class="btns"><button class="btn small ${p.on?"":"ghost"}" data-act="ow_toggle" data-id="${esc(p.id)}">${p.on?"ВКЛ":"ВЫКЛ"}</button>
+        <button class="btn small danger" data-act="ow_del" data-id="${esc(p.id)}">🗑</button></div></div>`;
+    }).join("");
+  }
+  h += `<label class="t">events.json</label><textarea id="owJson" readonly rows="6">${esc(owJson())}</textarea>
+    <button class="btn ghost wide" data-act="ow_copy">Скопировать JSON</button>`;
+  return h;
+};
+
+const TITLES = {ads:"app_ads",listing:"listingTitle",chats:"chatsTitle",chat:"chatsTitle",meet:"meetTitle",stock:"stockTitle",
+  phone:"phoneTitle",gallery:"galleryTitle",profile:"profileTitle",onboard:"profileTitle",settings:"settingsTitle",admin:"adminTitle",owner:"ownerTitle"};
+
+let lastView = null;
+function render(){
+  if (!S.profile && nav.view !== "onboard"){ nav = {view:"onboard"}; stack = []; startOnboard(false); }
+  const old = document.querySelector("main");
+  const st = old && lastView === nav.view ? old.scrollTop : 0;
+  const v = nav.view;
+  if (!S.profile){ $app.innerHTML = `<main>${V.onboard()}</main>`; lastView = v; return; }
+  const bar = v === "home" ? "" : `<div class="appbar"><button class="ab" data-act="back">‹</button>
+    <div class="ttl">${t(TITLES[v]||"home")}</div><button class="ab" data-act="home">🏠</button></div>`;
+  const mod = modal ? `<div class="overlay"><div class="modal"><div class="nm">${t("ev_news")}</div>
+      <p>${esc(ptext(modal))}</p>${effLine(modal)}
+      <div class="btns"><button class="btn" data-act="closemodal">${t("ev_ok")}</button></div></div></div>` : "";
+  $app.innerHTML = `
+    <div class="status"><span data-act="go" data-v="profile">${avatarHTML(S.profile.avatar,42)}</span><div class="info"><div class="money">💰 ${moneyStr()}</div>
+      <div class="meta">${t("day")} ${S.day} · ${t("demand")} ×${demandNow()}</div></div>
+      <button class="chip" data-act="next">⏭ ${t("nextDay")}</button></div>
+    ${bar}<main class="${v==="chat"?"chat":""}">${V[v]()}</main>
+    ${askReset?`<div class="overlay"><div class="modal"><p>${t("resetAsk")}</p>
+      <div class="btns"><button class="btn ghost" data-act="resetno">${t("resetNo")}</button>
+      <button class="btn danger" data-act="resetyes">${t("resetYes")}</button></div></div></div>`:""}${askWipe?`<div class="overlay"><div class="modal"><p>💥 Запустить ВАЙП? У всех, кто сейчас в игре, через 10 секунд сотрётся весь прогресс. Остальным он сотрётся при следующем входе. У тебя самого прогресс не сотрётся.</p>
+      <div class="btns"><button class="btn ghost" data-act="wipeno">Отмена</button><button class="btn danger" data-act="wipeyes">💥 Запустить</button></div></div></div>`:""}${mod}`;
+  const main = document.querySelector("main");
+  if (v === "chat"){ const m = document.getElementById("msgs"); if (m) m.scrollTop = m.scrollHeight; }
+  else if (main) main.scrollTop = st;
+  lastView = v;
+}
+
+/* ---------- чат ---------- */
+function say(l, from, text, photos){ l.chat.msgs.push({from, text, photos:!!photos}); }
+function chatAct(l, a, f){
+  const ch = l.chat;
+  if (ch.state === "closed" || ch.state === "bought") return;
+  if (a === "hello"){ say(l,"me",t("q_hello")); say(l,"sel",pick(t("s_hello"))); ch.state = "open"; }
+  else if (a === "photos"){ say(l,"me",t("q_photos")); say(l,"sel",t("s_photos"),true); ch.state = "open"; }
+  else if (a === "cond"){ say(l,"me",t("q_cond")); say(l,"sel",t("s_cond")[l.c]); ch.state = "open"; }
+  else if (a === "haggle"){
+    ch.state = "open";
+    const offer = Math.round(ch.price*f);
+    say(l,"me",t("q_haggle",{p:bf(offer)}));
+    if (offer >= l.min){ ch.price = offer; say(l,"sel",t("s_deal",{p:bf(offer)})); }
+    else {
+      ch.patience--;
+      if (ch.patience <= 0){ say(l,"sel",t("s_angry")); ch.state = "closed"; }
+      else { const counter = Math.max(l.min, Math.round((ch.price+offer)/2)); ch.price = counter; say(l,"sel",t("s_counter",{p:bf(counter)})); }
+    }
+  }
+  else if (a === "meet"){ say(l,"me",t("q_meet")); say(l,"sel",t("s_meet",{p:bf(ch.price)})); ch.state = "agreed"; }
+  else if (a === "bye"){ say(l,"me",t("q_bye")); say(l,"sel",t("s_bye")); ch.state = "closed"; }
+}
+function newPhone(m, c, paid){
+  return {id:S.nextId++, m, c, bat:between(BAT[c][0],BAT[c][1]), gb:pick([64,128,256]),
+    imei:String(1e14+Math.floor(Math.random()*9e14)), seed:rnd(1e9), paid:paid||0};
+}
+
+/* ---------- действия ---------- */
+function act(a, d){
+  switch(a){
+    case "go": go(d.v, {lid:d.lid?+d.lid:nav.lid, pid:d.pid?+d.pid:nav.pid, dev:d.dev?+d.dev:undefined}); break;
+    case "back": back(); break;
+    case "home": home(); break;
+    case "next": rollDay(S); save(); stack = []; if (["listing","chat","meet","ads","chats"].includes(nav.view)) nav = {view:"ads"}; toast(`${t("newDay")} ×${demandNow()}`); break;
+    case "chat": { const l = findL(+d.lid); if (!l) break; go("chat",{lid:l.id}); break; }
+    case "c": { const l = findL(nav.lid); if (l){ chatAct(l, d.a, +d.f); save(); } break; }
+    case "insp": { const l = findL(nav.lid); if (l){ l.insp = l.insp||{}; l.insp[d.k] = true; save(); } break; }
+    case "buy": {
+      const l = findL(+d.lid); if (!l) break;
+      const price = Math.max(1, Math.round(l.chat.price*pm()));
+      if (!S.inf && S.money < price){ toast(t("noMoney")); return; }
+      if (!S.inf) S.money -= price;
+      S.inv.push({id:l.id,m:l.m,c:l.c,bat:l.bat,gb:l.gb,imei:l.imei,seed:l.seed,paid:price});
+      S.listings = S.listings.filter(x=>x.id!==l.id); save();
+      toast(`${t("bought")}: ${pname(l)}`); stack = []; nav = {view:"stock"}; break;
+    }
+    case "leave": toast(t("left")); back(); break;
+    case "sell": {
+      const i = S.inv.findIndex(p=>p.id===+d.pid); if (i<0) break;
+      const pr = sellPrice(S.inv[i]); S.money += pr; S.inv.splice(i,1); save();
+      toast(`${t("sold")} ${fmt(pr)}`); if (nav.view==="phone"||nav.view==="gallery"){ stack=[]; nav={view:"stock"}; } break;
+    }
+    case "sellall": {
+      const n = S.inv.length, tot = S.inv.reduce((s,x)=>s+sellPrice(x),0);
+      S.inv = []; S.money += tot; save(); toast(`${t("soldAll")} ${n} · ${fmt(tot)}`); break;
+    }
+    case "lang": S.lang = d.l; S.langSet = true; save(); break;   // язык = валюта
+    case "promo": {
+      const inp = document.getElementById("promoIn");
+      const code = inp ? inp.value.trim() : "";
+      if (code === PROMO){ toast(t("promoOk")); go("admin"); }
+      else if (code === OWNER_CODE){ if (!OWPOSTS.length) OWPOSTS = EVPOSTS.slice(); go("owner"); }
+      else { toast(t("promoBad")); return; }
+      break;
+    }
+    case "resetask": askReset = true; break;
+    case "resetno": askReset = false; break;
+    case "resetyes": { const k = {seen:S.seen, wipes:S.wipes, profile:S.profile}; S = fresh(S.lang, S.langSet); S.seen = k.seen; S.wipes = k.wipes; S.profile = k.profile; } save(); askReset = false; stack = []; nav = {view:"home"}; toast(t("resetDone")); break;
+    case "adm": {
+      if (nav.view !== "admin") break;
+      if (d.a === "all"){ PHONES.forEach((_,m)=>S.inv.push(newPhone(m,3))); toast(`${t("given")}: ${PHONES.length}`); }
+      else if (d.a === "inf") S.inf = !S.inf;
+      else if (d.a === "cash"){ S.money += 1000000; toast(t("cashOk")); }
+      save(); break;
+    }
+    case "soon": toast(t("pm_toast")); return;
+    case "ob_pick": { const f = document.getElementById("obFile"); if (f) f.click(); return; }
+    case "ob_tg": OB.avatar = tgUser().photo_url || OB.avatar; break;
+    case "ob_emoji": OB.avatar = "emoji:"+d.e; break;
+    case "ob_save": {
+      const nk = (OB.nick||"").trim();
+      if (!OB.avatar){ OB.err = t("ob_needAvatar"); break; }
+      if (!nickOk(nk)){ OB.err = t("ob_err"); break; }
+      S.profile = {nick:nk, avatar:OB.avatar}; OB.err = ""; save();
+      if (stack.length) back(); else home();
+      break;
+    }
+    case "edit_profile": startOnboard(true); go("onboard"); break;
+    case "closemodal": {
+      if (!modal) break;
+      const p = modal; S.seen[p.id] = true;
+      if (p.effect === "gift") S.money += (+p.value||0);
+      if (p.effect === "phone") S.inv.push(newPhone(rnd(PHONES.length-1), 3));
+      modal = null; save(); queuePosts(); break;
+    }
+    /* --- владелец --- */
+    case "ow_preset": {
+      const pr = PRESETS[+d.i];
+      if (pr.effect === "wipe"){ askWipe = true; wipePreset = pr; break; }   // вайп только после подтверждения
+      owPush(mkPost(pr)); publish().then(render); break;
+    }
+    case "wipeno": askWipe = false; break;
+    case "wipeyes": {
+      askWipe = false; const post = mkPost(wipePreset);
+      OWPOSTS.push(post); S.seen[post.id] = true; S.wipes[post.id] = true; save();
+      publish().then(render); startWipe(post, true); break;
+    }
+    case "ow_add": {
+      const text = {ru:OW.ru.trim(),uk:OW.uk.trim(),kk:OW.kk.trim(),en:OW.en.trim()};
+      if (!text.ru && !text.uk && !text.kk && !text.en && OW.effect==="none" && OW.fx==="none"){ toast("Напиши текст или выбери эффект"); return; }
+      owPush(mkPost({text, effect:OW.effect, value:OW.value, secs:OW.secs, fx:OW.fx, online:OW.online==="1"}));
+      OW.ru = OW.uk = OW.kk = OW.en = "";
+      publish().then(render); break;
+    }
+    case "ow_toggle": {
+      const p = OWPOSTS.find(x=>x.id===d.id); if (!p) break;
+      p.on = !p.on; if (p.on) p.rev = (p.rev||0)+1; const sc = p.secs!==undefined ? p.secs : (p.hours||0)*3600; if (p.on && sc>0) p.until = new Date(Date.now()+sc*1000).toISOString();
+      publish().then(render); break;
+    }
+    case "ow_del": OWPOSTS = OWPOSTS.filter(x=>x.id!==d.id); publish().then(render); break;
+    case "ow_secret": {
+      const v = (document.getElementById("owSecret")||{}).value || "";
+      if (v.trim()){ try { localStorage.setItem("owner_secret", v.trim()); } catch(e){} toast("Секрет сохранён"); }
+      break;
+    }
+    case "ow_secretclear": try { localStorage.removeItem("owner_secret"); } catch(e){} break;
+    case "ow_copy": {
+      const ta = document.getElementById("owJson");
+      try { navigator.clipboard.writeText(owJson()).then(()=>toast("Скопировано"), ()=>{ ta.select(); document.execCommand("copy"); toast("Скопировано"); }); }
+      catch(e){ if (ta){ ta.select(); try{ document.execCommand("copy"); toast("Скопировано"); }catch(_){ toast("Выдели текст и скопируй"); } } }
+      return;
+    }
+  }
+  render();
+}
+$app.addEventListener("click", e=>{
+  const b = e.target.closest("[data-act]"); if (b) act(b.dataset.act, b.dataset);
+});
+$app.addEventListener("keydown", e=>{
+  if (e.key === "Enter" && e.target.id === "promoIn") act("promo", {});
+});
+$app.addEventListener("input", e=>{
+  const d = e.target.dataset||{};
+  if (d.ow) OW[d.ow] = e.target.value;
+  if (d.ob) OB[d.ob] = e.target.value;
+});
+$app.addEventListener("change", e=>{ if (e.target.id === "obFile") handleFile(e.target.files[0]); });
+
+if (!S.profile) startOnboard(false);
+render();
+pullEvents();
+setInterval(pullEvents, LIVE_URL ? 5000 : 60000);
+document.addEventListener("visibilitychange", ()=>{ if (!document.hidden) pullEvents(); });
+</script>
+</body>
+</html>

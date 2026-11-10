@@ -68,6 +68,7 @@ h2{margin:0 0 4px;font-size:21px}
 .btn.wide{width:100%;margin-bottom:12px}
 .btn.small{min-height:48px;padding:0 14px;font-size:15px}
 .btns{display:flex;gap:8px;flex-shrink:0}
+.card.col{flex-wrap:wrap}.card.col .btns{width:100%;flex-shrink:1}.card.col .btns .btn{flex:1;padding:0 6px;font-size:14px}
 .row{display:flex;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid var(--bg2)}
 .row b{font-weight:700;text-align:right}
 .seg{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
@@ -154,6 +155,11 @@ const OWNER_CODE = "OWNER-4TqX9mZ2";                                 // пане
 const LIVE_URL = "https://admin-abuse-7ced8-default-rtdb.firebaseio.com";   // адрес Firebase Realtime Database, например "https://xxxx-default-rtdb.firebaseio.com"
 const SAVE_KEY = "phone_resale_v2";
 const START_MONEY = 500;
+// Аккаунт владельца: ник QOOX открывается только по паролю (в коде хранится не пароль, а его SHA-256)
+const OWNER_NICK = "QOOX";
+const OWNER_PASS_HASH = "366c8c973de0a543b7271b00384206cf41f4e2af0e821c4b4b24c798ea6d2955";
+const RESERVED = ["qoox","admin","owner","moderator","support","bot","vladelec","владелец","админ"];
+const DEVICE_UID = (()=>{ try { let u = localStorage.getItem("device_uid"); if (!u){ u = Array.from(crypto.getRandomValues(new Uint8Array(8))).map(b=>b.toString(16).padStart(2,"0")).join(""); localStorage.setItem("device_uid", u); } return u; } catch(e){ return "x"+Math.random().toString(16).slice(2,10); } })();
 const NAMES = ["Саша","Макс","Оля","Дима","Лена","Артём","Ника","Богдан"];
 
 // Примерные курсы к доллару. Игра внутри считает в $, на экране показывает валюту выбранного языка.
@@ -199,7 +205,8 @@ ru:{
  adminTitle:"Тестовое меню",giveAll:"Выдать все телефоны",given:"Выдано телефонов",inf:"Бесконечные деньги",on:"ВКЛ",off:"ВЫКЛ",
  cash:"+1 000 000",cashOk:"Добавлено 1 000 000",close:"Закрыть",newDay:"Новый день, спрос",
  ownerTitle:"👑 Владелец",
- wipe_title:"ВАЙП!!!",wipe_boom:"БУМ!",ob_title:"Создай профиль",ob_nick:"Твой ник (тег)",ob_nickPh:"например, phone_king",ob_upload:"📷 Загрузить фото",ob_tg:"Фото из Телеграма",ob_emoji:"Или выбери смайлик вместо фото",ob_start:"Начать игру",ob_save:"Сохранить",ob_err:"Ник: 3–16 символов, буквы, цифры и _",ob_needAvatar:"Выбери аватарку: загрузи фото или смайлик",profile_edit:"✏️ Изменить профиль",app_pm:"Маркет игроков",soon:"(скоро будет)",pm_toast:"Скоро будет!",
+ wipe_title:"ВАЙП!!!",wipe_boom:"БУМ!",app_friends:"Друзья",owner_badge:"Владелец",ob_taken:"Этот ник уже занят",ob_owner:"👑 Это аккаунт владельца. Введи пароль.",ob_pass:"Пароль",ob_badPass:"Неверный пароль",ob_reserved:"Этот ник зарезервирован",ob_net:"Нет связи с базой, попробуй позже",ob_locked:"Ник нельзя изменить",
+ ob_title:"Создай профиль",ob_nick:"Твой ник (тег)",ob_nickPh:"например, phone_king",ob_upload:"📷 Загрузить фото",ob_tg:"Фото из Телеграма",ob_emoji:"Или выбери смайлик вместо фото",ob_start:"Начать игру",ob_save:"Сохранить",ob_err:"Ник: 3–16 символов, буквы, цифры и _",ob_needAvatar:"Выбери аватарку: загрузи фото или смайлик",profile_edit:"✏️ Изменить профиль",app_pm:"Маркет игроков",soon:"(скоро будет)",pm_toast:"Скоро будет!",
  wipe_done:"Был вайп: весь прогресс сброшен. Начинай заново!",
  ev_news:"📢 Новость",ev_ok:"Понятно",ev_gift:"🎁 Подарок: {p}",ev_phone:"📱 Подарок: телефон",ev_demand:"🔥 Спрос ×{v}",ev_disc:"🏷 Скидка {v}% на покупки",
  conds:["Разбит","Плохое","Хорошее","Идеал"]},
@@ -231,7 +238,8 @@ uk:{
  resetAsk:"Точно скинути весь прогрес? Гроші й склад зникнуть.",resetYes:"Так, скинути",resetNo:"Скасувати",resetDone:"Прогрес скинуто",
  adminTitle:"Тестове меню",giveAll:"Видати всі телефони",given:"Видано телефонів",inf:"Нескінченні гроші",on:"УВІМК",off:"ВИМК",
  cash:"+1 000 000",cashOk:"Додано 1 000 000",close:"Закрити",newDay:"Новий день, попит",
- wipe_title:"ВАЙП!!!",wipe_boom:"БУМ!",ob_title:"Створи профіль",ob_nick:"Твій нік (тег)",ob_nickPh:"наприклад, phone_king",ob_upload:"📷 Завантажити фото",ob_tg:"Фото з Телеграму",ob_emoji:"Або обери смайлик замість фото",ob_start:"Почати гру",ob_save:"Зберегти",ob_err:"Нік: 3–16 символів, літери, цифри та _",ob_needAvatar:"Обери аватарку: завантаж фото або смайлик",profile_edit:"✏️ Змінити профіль",app_pm:"Маркет гравців",soon:"(скоро буде)",pm_toast:"Скоро буде!",
+ wipe_title:"ВАЙП!!!",wipe_boom:"БУМ!",app_friends:"Друзі",owner_badge:"Власник",ob_taken:"Цей нік уже зайнятий",ob_owner:"👑 Це акаунт власника. Введи пароль.",ob_pass:"Пароль",ob_badPass:"Невірний пароль",ob_reserved:"Цей нік зарезервований",ob_net:"Немає зв'язку з базою, спробуй пізніше",ob_locked:"Нік не можна змінити",
+ ob_title:"Створи профіль",ob_nick:"Твій нік (тег)",ob_nickPh:"наприклад, phone_king",ob_upload:"📷 Завантажити фото",ob_tg:"Фото з Телеграму",ob_emoji:"Або обери смайлик замість фото",ob_start:"Почати гру",ob_save:"Зберегти",ob_err:"Нік: 3–16 символів, літери, цифри та _",ob_needAvatar:"Обери аватарку: завантаж фото або смайлик",profile_edit:"✏️ Змінити профіль",app_pm:"Маркет гравців",soon:"(скоро буде)",pm_toast:"Скоро буде!",
  wipe_done:"Був вайп: весь прогрес скинуто. Починай заново!",
  ev_news:"📢 Новина",ev_ok:"Зрозуміло",ev_gift:"🎁 Подарунок: {p}",ev_phone:"📱 Подарунок: телефон",ev_demand:"🔥 Попит ×{v}",ev_disc:"🏷 Знижка {v}% на покупки",
  conds:["Розбитий","Погане","Добре","Ідеал"]},
@@ -263,7 +271,8 @@ kk:{
  resetAsk:"Бүкіл прогресті тазалайсың ба? Ақша мен қойма жойылады.",resetYes:"Иә, тазалау",resetNo:"Бас тарту",resetDone:"Прогресс тазаланды",
  adminTitle:"Тест мәзірі",giveAll:"Барлық телефонды беру",given:"Берілген телефон саны",inf:"Шексіз ақша",on:"ҚОСУЛЫ",off:"ӨШІРУЛІ",
  cash:"+1 000 000",cashOk:"1 000 000 қосылды",close:"Жабу",newDay:"Жаңа күн, сұраныс",
- wipe_title:"ВАЙП!!!",wipe_boom:"ГҮМ!",ob_title:"Профиль жасаңыз",ob_nick:"Ник (тег)",ob_nickPh:"мысалы, phone_king",ob_upload:"📷 Фото жүктеу",ob_tg:"Telegram фотосы",ob_emoji:"Немесе фото орнына смайлик таңда",ob_start:"Ойынды бастау",ob_save:"Сақтау",ob_err:"Ник: 3–16 таңба, әріптер, сандар және _",ob_needAvatar:"Аватар таңда: фото жүкте немесе смайлик",profile_edit:"✏️ Профильді өзгерту",app_pm:"Ойыншылар маркеті",soon:"(жақында)",pm_toast:"Жақында болады!",
+ wipe_title:"ВАЙП!!!",wipe_boom:"ГҮМ!",app_friends:"Достар",owner_badge:"Иесі",ob_taken:"Бұл ник бос емес",ob_owner:"👑 Бұл иесінің аккаунты. Құпиясөзді енгіз.",ob_pass:"Құпиясөз",ob_badPass:"Құпиясөз қате",ob_reserved:"Бұл ник сақталған",ob_net:"Базамен байланыс жоқ, кейінірек көр",ob_locked:"Никті өзгертуге болмайды",
+ ob_title:"Профиль жасаңыз",ob_nick:"Ник (тег)",ob_nickPh:"мысалы, phone_king",ob_upload:"📷 Фото жүктеу",ob_tg:"Telegram фотосы",ob_emoji:"Немесе фото орнына смайлик таңда",ob_start:"Ойынды бастау",ob_save:"Сақтау",ob_err:"Ник: 3–16 таңба, әріптер, сандар және _",ob_needAvatar:"Аватар таңда: фото жүкте немесе смайлик",profile_edit:"✏️ Профильді өзгерту",app_pm:"Ойыншылар маркеті",soon:"(жақында)",pm_toast:"Жақында болады!",
  wipe_done:"Вайп болды: бүкіл прогресс тазаланды. Қайта баста!",
  ev_news:"📢 Жаңалық",ev_ok:"Түсінікті",ev_gift:"🎁 Сыйлық: {p}",ev_phone:"📱 Сыйлық: телефон",ev_demand:"🔥 Сұраныс ×{v}",ev_disc:"🏷 Сатып алуға {v}% жеңілдік",
  conds:["Сынған","Нашар","Жақсы","Тамаша"]},
@@ -295,7 +304,8 @@ en:{
  resetAsk:"Really reset all progress? Money and stock will be lost.",resetYes:"Yes, reset",resetNo:"Cancel",resetDone:"Progress reset",
  adminTitle:"Test menu",giveAll:"Give all phones",given:"Phones given",inf:"Infinite money",on:"ON",off:"OFF",
  cash:"+1,000,000",cashOk:"Added 1,000,000",close:"Close",newDay:"New day, demand",
- wipe_title:"WIPE!!!",wipe_boom:"BOOM!",ob_title:"Create your profile",ob_nick:"Your nickname (tag)",ob_nickPh:"e.g. phone_king",ob_upload:"📷 Upload photo",ob_tg:"Telegram photo",ob_emoji:"Or pick an emoji instead",ob_start:"Start playing",ob_save:"Save",ob_err:"Nickname: 3–16 chars, letters, digits and _",ob_needAvatar:"Pick an avatar: upload a photo or an emoji",profile_edit:"✏️ Edit profile",app_pm:"Players market",soon:"(coming soon)",pm_toast:"Coming soon!",
+ wipe_title:"WIPE!!!",wipe_boom:"BOOM!",app_friends:"Friends",owner_badge:"Owner",ob_taken:"This nickname is already taken",ob_owner:"👑 This is the owner's account. Enter the password.",ob_pass:"Password",ob_badPass:"Wrong password",ob_reserved:"This nickname is reserved",ob_net:"Can't reach the database, try later",ob_locked:"Nickname can't be changed",
+ ob_title:"Create your profile",ob_nick:"Your nickname (tag)",ob_nickPh:"e.g. phone_king",ob_upload:"📷 Upload photo",ob_tg:"Telegram photo",ob_emoji:"Or pick an emoji instead",ob_start:"Start playing",ob_save:"Save",ob_err:"Nickname: 3–16 chars, letters, digits and _",ob_needAvatar:"Pick an avatar: upload a photo or an emoji",profile_edit:"✏️ Edit profile",app_pm:"Players market",soon:"(coming soon)",pm_toast:"Coming soon!",
  wipe_done:"There was a wipe: all progress is reset. Start over!",
  ev_news:"📢 News",ev_ok:"Got it",ev_gift:"🎁 Gift: {p}",ev_phone:"📱 Gift: a phone",ev_demand:"🔥 Demand ×{v}",ev_disc:"🏷 {v}% off purchases",
  conds:["Broken","Poor","Good","Mint"]}
@@ -321,9 +331,12 @@ function mkListing(S){
   const base = PHONES[m][1]*COND[c];
   const ask = Math.max(5, Math.round(base*(0.8+Math.random()*0.35)));
   const min = Math.max(3, Math.round(ask*(0.78+Math.random()*0.17)));
-  return {id:S.nextId++, m, c, ask, min, seller:pick(NAMES), bat:between(BAT[c][0],BAT[c][1]),
+  const ob = Math.random()>0.35, back = Math.random()<0.25, cam = Math.random()<0.17, imeiBad = Math.random()<0.15;
+  const dm_ = defMul({ob,back,cam,imeiBad});
+  const ask2 = Math.max(5, Math.round(ask*Math.min(1, dm_*1.12)));
+  return {id:S.nextId++, m, c, ask:ask2, min:Math.max(3, Math.round(ask2*(0.78+Math.random()*0.17))), ob, back, cam, imeiBad, seller:pick(NAMES), bat:between(BAT[c][0],BAT[c][1]),
     gb:pick([64,128,256]), imei:String(1e14+Math.floor(Math.random()*9e14)), seed:rnd(1e9),
-    chat:{msgs:[], price:ask, patience:3, state:"idle"}, insp:{}};
+    chat:{msgs:[], price:ask2, patience:3, state:"idle"}, insp:{}};
 }
 function rollDay(S, first){
   if (!first) S.day++;
@@ -332,7 +345,7 @@ function rollDay(S, first){
   for (let i=0;i<8;i++) S.listings.push(mkListing(S));
 }
 function fresh(lang, keepSet){
-  const S = {lang:lang||detectLang(), langSet:!!keepSet, money:START_MONEY, day:1, demand:1, inv:[], listings:[], inf:false, nextId:1, seen:{}, wipes:{}, profile:null, lastActive:Date.now()};
+  const S = {lang:lang||detectLang(), langSet:!!keepSet, money:START_MONEY, day:1, demand:1, inv:[], listings:[], inf:false, nextId:1, seen:{}, wipes:{}, profile:null, parts:{}, lastActive:Date.now()};
   rollDay(S,true);
   return S;
 }
@@ -342,7 +355,7 @@ function load(){
     if (raw){
       const s = JSON.parse(raw);
       if (s && Array.isArray(s.inv) && Array.isArray(s.listings) && I[s.lang]){
-        s.seen = s.seen || {}; s.wipes = s.wipes || {};
+        s.seen = s.seen || {}; s.wipes = s.wipes || {}; s.parts = s.parts || {};
         if (!s.langSet) s.lang = detectLang();   // пока язык не выбран вручную, следуем языку Телеграма
         return s;
       }
@@ -368,6 +381,74 @@ function toast(msg){
   $toast.textContent = msg; $toast.classList.add("show");
   clearTimeout(toastTimer); toastTimer = setTimeout(()=>$toast.classList.remove("show"), 2200);
 }
+
+const U = {
+ru:{app_own:"Свой телефон",ws_btn:"Мастерская",ws_title:"Мастерская",own_title:"Свой телефон",
+ ws_screen:"Экран",ws_back:"Задняя крышка",ws_bat:"Батарея",ws_cam:"Камера",ws_imei:"IMEI",
+ ws_backOk:"целая",ws_backBad:"треснутая",ws_orig:"оригинал",ws_copy:"не оригинал",ws_hidden:"снять крышку, чтобы увидеть",
+ ws_camOk:"работает",ws_camBad:"не работает",ws_imeiOk:"чистый",ws_imeiBad:"В БЛОКИРОВКЕ",
+ ws_open:"🔧 Снять заднюю крышку",ws_close:"Поставить крышку на место",ws_opened:"Крышка снята. Теперь можно менять батарею, чинить камеру и разблокировать IMEI.",
+ ws_needOpen:"Сначала сними заднюю крышку",ws_batOrig:"Поставить ОРИГИНАЛЬНУЮ батарею",ws_batCopy:"Поставить НЕ оригинальную батарею",
+ ws_fixScr:"Заменить экран",ws_fixBack:"Заменить заднюю крышку",ws_fixCam:"Починить камеру",ws_fixImei:"Разблокировать IMEI (разобрать)",
+ ws_done:"Готово",ws_noNeed:"Здесь ничего чинить не нужно",ws_screenGood:"Экран уже в хорошем состоянии",
+ i_cam:"📷 Камера",r_camOk:"Камера снимает нормально.",r_camBad:"Камера не работает: чёрный экран вместо картинки.",
+ r_imeiBad:"⚠️ IMEI в блокировке! Телефон не активируется.",r_backBad:"Задняя крышка в трещинах.",
+ own_parts:"Запчасти (барахолка)",own_assemble:"Сборка",own_name:"Название твоего телефона",own_namePh:"например, QOOX One",
+ own_have:"есть",own_buy:"Купить",own_build:"🛠 Собрать телефон",own_missing:"Не хватает деталей: ",own_will:"Будет использована лучшая деталь каждого вида.",
+ own_value:"Цена готового телефона",own_built:"Телефон собран! Он на складе.",own_hint:"Купи детали и собери свой телефон. Он стоит дороже, чем сумма деталей.",
+ pk_board:"Плата",pk_screen:"Экран",pk_bat:"Батарея",pk_cam:"Камера",pk_body:"Корпус",
+ pt_board:["Бюджетная","Средняя","Флагманская"],pt_screen:["HD LCD","AMOLED","AMOLED 120 Гц"],pt_bat:["3000 мАч","4500 мАч","5000 мАч"],pt_cam:["12 МП","50 МП","108 МП"],pt_body:["Пластик","Стекло","Металл"]},
+uk:{app_own:"Свій телефон",ws_btn:"Майстерня",ws_title:"Майстерня",own_title:"Свій телефон",
+ ws_screen:"Екран",ws_back:"Задня кришка",ws_bat:"Батарея",ws_cam:"Камера",ws_imei:"IMEI",
+ ws_backOk:"ціла",ws_backBad:"тріснута",ws_orig:"оригінал",ws_copy:"не оригінал",ws_hidden:"зніми кришку, щоб побачити",
+ ws_camOk:"працює",ws_camBad:"не працює",ws_imeiOk:"чистий",ws_imeiBad:"У БЛОКУВАННІ",
+ ws_open:"🔧 Зняти задню кришку",ws_close:"Поставити кришку на місце",ws_opened:"Кришку знято. Тепер можна міняти батарею, лагодити камеру і розблоковувати IMEI.",
+ ws_needOpen:"Спочатку зніми задню кришку",ws_batOrig:"Поставити ОРИГІНАЛЬНУ батарею",ws_batCopy:"Поставити НЕ оригінальну батарею",
+ ws_fixScr:"Замінити екран",ws_fixBack:"Замінити задню кришку",ws_fixCam:"Полагодити камеру",ws_fixImei:"Розблокувати IMEI (розібрати)",
+ ws_done:"Готово",ws_noNeed:"Тут нічого лагодити не треба",ws_screenGood:"Екран уже в хорошому стані",
+ i_cam:"📷 Камера",r_camOk:"Камера знімає нормально.",r_camBad:"Камера не працює: чорний екран замість картинки.",
+ r_imeiBad:"⚠️ IMEI у блокуванні! Телефон не активується.",r_backBad:"Задня кришка в тріщинах.",
+ own_parts:"Запчастини (барахолка)",own_assemble:"Збірка",own_name:"Назва твого телефону",own_namePh:"наприклад, QOOX One",
+ own_have:"є",own_buy:"Купити",own_build:"🛠 Зібрати телефон",own_missing:"Не вистачає деталей: ",own_will:"Буде використано кращу деталь кожного виду.",
+ own_value:"Ціна готового телефону",own_built:"Телефон зібрано! Він на складі.",own_hint:"Купи деталі й збери свій телефон. Він коштує дорожче, ніж сума деталей.",
+ pk_board:"Плата",pk_screen:"Екран",pk_bat:"Батарея",pk_cam:"Камера",pk_body:"Корпус",
+ pt_board:["Бюджетна","Середня","Флагманська"],pt_screen:["HD LCD","AMOLED","AMOLED 120 Гц"],pt_bat:["3000 мАг","4500 мАг","5000 мАг"],pt_cam:["12 Мп","50 Мп","108 Мп"],pt_body:["Пластик","Скло","Метал"]},
+kk:{app_own:"Өз телефоным",ws_btn:"Шеберхана",ws_title:"Шеберхана",own_title:"Өз телефоным",
+ ws_screen:"Экран",ws_back:"Артқы қақпақ",ws_bat:"Батарея",ws_cam:"Камера",ws_imei:"IMEI",
+ ws_backOk:"бүтін",ws_backBad:"жарылған",ws_orig:"түпнұсқа",ws_copy:"түпнұсқа емес",ws_hidden:"көру үшін қақпақты ал",
+ ws_camOk:"жұмыс істейді",ws_camBad:"жұмыс істемейді",ws_imeiOk:"таза",ws_imeiBad:"БЛОКТА",
+ ws_open:"🔧 Артқы қақпақты алу",ws_close:"Қақпақты орнына қою",ws_opened:"Қақпақ алынды. Енді батареяны ауыстыруға, камераны жөндеуге, IMEI ашуға болады.",
+ ws_needOpen:"Алдымен артқы қақпақты ал",ws_batOrig:"ТҮПНҰСҚА батарея салу",ws_batCopy:"Түпнұсқа емес батарея салу",
+ ws_fixScr:"Экранды ауыстыру",ws_fixBack:"Артқы қақпақты ауыстыру",ws_fixCam:"Камераны жөндеу",ws_fixImei:"IMEI ашу (бөлшектеу)",
+ ws_done:"Дайын",ws_noNeed:"Мұнда жөндейтін ештеңе жоқ",ws_screenGood:"Экран жақсы күйде",
+ i_cam:"📷 Камера",r_camOk:"Камера қалыпты түсіреді.",r_camBad:"Камера жұмыс істемейді: сурет орнына қара экран.",
+ r_imeiBad:"⚠️ IMEI блокта! Телефон іске қосылмайды.",r_backBad:"Артқы қақпақ жарылған.",
+ own_parts:"Қосалқы бөлшектер",own_assemble:"Жинау",own_name:"Телефоныңның аты",own_namePh:"мысалы, QOOX One",
+ own_have:"бар",own_buy:"Сатып алу",own_build:"🛠 Телефон жинау",own_missing:"Жетпейтін бөлшектер: ",own_will:"Әр түрдің ең жақсысы қолданылады.",
+ own_value:"Дайын телефон бағасы",own_built:"Телефон жиналды! Ол қоймада.",own_hint:"Бөлшектерді сатып алып, өз телефоныңды жина. Ол бөлшектер қосындысынан қымбат.",
+ pk_board:"Плата",pk_screen:"Экран",pk_bat:"Батарея",pk_cam:"Камера",pk_body:"Корпус",
+ pt_board:["Бюджеттік","Орташа","Флагман"],pt_screen:["HD LCD","AMOLED","AMOLED 120 Гц"],pt_bat:["3000 мАч","4500 мАч","5000 мАч"],pt_cam:["12 МП","50 МП","108 МП"],pt_body:["Пластик","Шыны","Металл"]},
+en:{app_own:"My phone",ws_btn:"Workshop",ws_title:"Workshop",own_title:"My phone",
+ ws_screen:"Screen",ws_back:"Back cover",ws_bat:"Battery",ws_cam:"Camera",ws_imei:"IMEI",
+ ws_backOk:"intact",ws_backBad:"cracked",ws_orig:"original",ws_copy:"non-original",ws_hidden:"remove the cover to see",
+ ws_camOk:"works",ws_camBad:"broken",ws_imeiOk:"clean",ws_imeiBad:"BLOCKED",
+ ws_open:"🔧 Remove back cover",ws_close:"Put the cover back",ws_opened:"Cover removed. You can now swap the battery, fix the camera and unlock the IMEI.",
+ ws_needOpen:"Remove the back cover first",ws_batOrig:"Install ORIGINAL battery",ws_batCopy:"Install NON-original battery",
+ ws_fixScr:"Replace screen",ws_fixBack:"Replace back cover",ws_fixCam:"Repair camera",ws_fixImei:"Unlock IMEI (disassemble)",
+ ws_done:"Done",ws_noNeed:"Nothing to fix here",ws_screenGood:"The screen is already in good shape",
+ i_cam:"📷 Camera",r_camOk:"The camera takes photos fine.",r_camBad:"The camera is broken: black screen instead of a picture.",
+ r_imeiBad:"⚠️ IMEI is blocked! The phone can't be activated.",r_backBad:"The back cover is cracked.",
+ own_parts:"Parts market",own_assemble:"Assembly",own_name:"Your phone's name",own_namePh:"e.g. QOOX One",
+ own_have:"owned",own_buy:"Buy",own_build:"🛠 Build the phone",own_missing:"Missing parts: ",own_will:"The best part of each kind will be used.",
+ own_value:"Finished phone value",own_built:"Phone built! It's in your stock.",own_hint:"Buy parts and build your own phone. It's worth more than the sum of its parts.",
+ pk_board:"Board",pk_screen:"Screen",pk_bat:"Battery",pk_cam:"Camera",pk_body:"Body",
+ pt_board:["Budget","Mid-range","Flagship"],pt_screen:["HD LCD","AMOLED","AMOLED 120 Hz"],pt_bat:["3000 mAh","4500 mAh","5000 mAh"],pt_cam:["12 MP","50 MP","108 MP"],pt_body:["Plastic","Glass","Metal"]}
+};
+for (const l in U) Object.assign(I[l], U[l]);
+const PARTS = {board:[25,70,180], screen:[15,45,90], bat:[8,18,28], cam:[10,30,65], body:[6,18,30]};
+const PKEYS = Object.keys(PARTS);
+const OWN_LOOK = 13;   // внешний вид своего телефона = как у Nothing Phone 2
+let OWN = {name:""};
 function t(k, v){
   let s = (I[S.lang] && I[S.lang][k] !== undefined) ? I[S.lang][k] : I.ru[k];
   if (typeof s === "string" && v) for (const x in v) s = s.split("{"+x+"}").join(v[x]);
@@ -380,7 +461,7 @@ function fmt(n){
   return c.r === 1 ? "$"+v : v.replace(/,/g," ")+" "+c.s;
 }
 const moneyStr = () => S.inf ? "∞" : fmt(S.money);
-const pname = it => PHONES[it.m][0];
+const pname = it => it.custom ? it.custom.name : PHONES[it.m][0];
 
 /* ---------- события от владельца ---------- */
 let EVPOSTS = [];
@@ -402,7 +483,11 @@ const demandNow = () => Math.round(S.demand*dm()*100)/100;
 const bf = x => fmt(x*pm());                       // цена покупки со скидкой события
 const ptext = p => { const x = p.text||{}; return x[S.lang]||x.ru||x.en||x.uk||x.kk||""; };
 
-const sellPrice = it => Math.floor(PHONES[it.m][1]*COND[it.c]*demandNow()*(0.9+0.1*(it.bat||85)/100));
+function defMul(it){ return (it.ob===false?0.93:1)*(it.back?0.92:1)*(it.cam?0.78:1)*(it.imeiBad?0.35:1); }
+const baseOf = it => it.custom ? it.custom.val : PHONES[it.m][1];
+const sellPrice = it => Math.floor(baseOf(it)*COND[it.c]*demandNow()*(0.9+0.1*(it.bat||85)/100)*defMul(it));
+const wsCost = (it,k) => { const B = baseOf(it); return Math.max({batCopy:4,batOrig:8,back:5,scr:15,cam:10,imei:25}[k], Math.round(B*{batCopy:0.04,batOrig:0.10,back:0.07,scr:0.15,cam:0.13,imei:0.28}[k]*100)/100); };
+const partPrice = (k,i) => { const b = PARTS[k][i]; return Math.max(1, Math.round(b*(0.85+0.3*((Math.sin(S.day*13+i*7+k.length*5)+1)/2))*pm()*10)/10); };
 const findL = id => S.listings.find(l=>l.id===id);
 const findP = id => S.inv.find(p=>p.id===id);
 
@@ -454,11 +539,11 @@ async function pullEvents(){
 
 /* ---------- профиль ---------- */
 const EMOJIS = ["🦊","🐼","🐯","🦁","🐸","🐵","🦄","🐲","🤖","👾","😎","🔥"];
-let OB = {nick:"", avatar:"", err:""};
+let OB = {nick:"", avatar:"", err:"", pass:""};
 function tgUser(){ try { return (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) || {}; } catch(e){ return {}; } }
 function startOnboard(edit){
   const u = tgUser();
-  OB = {nick: (edit && S.profile) ? S.profile.nick : String(u.username||"").slice(0,16), avatar: (edit && S.profile) ? S.profile.avatar : "", err:""};
+  OB = {nick: (edit && S.profile) ? S.profile.nick : String(u.username||"").slice(0,16), avatar: (edit && S.profile) ? S.profile.avatar : "", err:"", pass:""};
 }
 function avatarHTML(av, size){
   const st = `width:${size}px;height:${size}px;font-size:${Math.round(size*0.55)}px`;
@@ -467,6 +552,42 @@ function avatarHTML(av, size){
   return `<span class="avatar" style="${st}">👤</span>`;
 }
 const nickOk = n => /^[\p{L}\d_]{3,16}$/u.test(n);
+async function sha256hex(str){
+  if (!(window.crypto && crypto.subtle)) return "";
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+// Ник занимается записью в базу: правило базы разрешает создать запись только если её ещё нет, поэтому занятый ник другому не достанется
+async function claimNick(low){
+  try {
+    const r = await fetch(LIVE_URL.replace(/\/$/,"")+"/nicks/"+encodeURIComponent(low)+".json",
+      {method:"PUT", body:JSON.stringify({uid:DEVICE_UID, t:{".sv":"timestamp"}})});
+    if (r.ok) return "ok";
+    return (r.status===401 || r.status===403) ? "taken" : "err";
+  } catch(e){ return "err"; }
+}
+async function saveProfile(){
+  OB.err = "";
+  const nk = (OB.nick||"").trim(), low = nk.toLowerCase();
+  if (!OB.avatar){ OB.err = t("ob_needAvatar"); return; }
+  if (S.profile){                     // редактирование: ник не меняется, только аватарка
+    S.profile.avatar = OB.avatar; save(); if (stack.length) back(); else home(); return;
+  }
+  if (!nickOk(nk)){ OB.err = t("ob_err"); return; }
+  let owner = false;
+  if (low === OWNER_NICK.toLowerCase()){
+    const ok = (await sha256hex(OB.pass||"")) === OWNER_PASS_HASH;
+    if (!ok){ OB.err = t("ob_badPass"); return; }
+    owner = true;
+  } else if (RESERVED.includes(low)){ OB.err = t("ob_reserved"); return; }
+  if (!owner && LIVE_URL){
+    const r = await claimNick(low);
+    if (r === "taken"){ OB.err = t("ob_taken"); return; }
+    if (r === "err"){ OB.err = t("ob_net"); return; }
+  }
+  S.profile = {nick: owner ? OWNER_NICK : nk, avatar: OB.avatar, owner}; save();
+  if (stack.length) back(); else home();
+}
 function handleFile(f){
   if (!f) return;
   const r = new FileReader();
@@ -698,13 +819,14 @@ const V = {};
 V.home = ()=>{
   const chats = S.listings.filter(l=>l.chat.msgs.length).length;
   const apps = [["ads","🛒","#2f7df6",0],["chats","💬","#1f9d55",chats],["stock","🎒","#e8833a",S.inv.length],
-                ["profile","👤","#8a5cf6",0],["settings","⚙️","#6b7480",0]];
+                ["own","🛠","#c2410c",0],["profile","👤","#8a5cf6",0],["settings","⚙️","#6b7480",0]];
   const ev = active().filter(p=>p.effect==="demand"||p.effect==="discount")
     .map(p=>`<div class="evb">${t(p.effect==="demand"?"ev_demand":"ev_disc",{v:+p.value})}</div>`).join("");
   return ev + `<div class="home">${apps.map(([v,ic,col,n])=>`<button class="app" data-act="go" data-v="${v}">
     <div class="ic" style="background:${col}">${ic}</div>${t("app_"+v)}
     ${n?`<span class="badge">${n}</span>`:""}</button>`).join("")}
-    <button class="app soon" data-act="soon"><div class="ic" style="background:#8a8f98">🌐</div>${t("app_pm")}<small>${t("soon")}</small></button></div>`;
+    <button class="app soon" data-act="soon"><div class="ic" style="background:#8a8f98">🌐</div>${t("app_pm")}<small>${t("soon")}</small></button>
+    <button class="app soon" data-act="soon"><div class="ic" style="background:#8a8f98">👥</div>${t("app_friends")}<small>${t("soon")}</small></button></div>`;
 };
 V.ads = ()=>{
   let h = `<h2>${t("adsTitle")}</h2><p class="hint">${t("adsHint")}</p>`;
@@ -762,15 +884,17 @@ V.meet = ()=>{
   const l = findL(nav.lid); if (!l) return `<p class="empty">—</p>`;
   const ins = l.insp || {};
   const res = [];
-  if (ins.screen) res.push(t("r_screen")[l.c]);
+  if (ins.screen){ res.push(t("r_screen")[l.c]); if (l.back) res.push(t("r_backBad")); }
   if (ins.bat) res.push(t("r_bat",{b:l.bat}));
-  if (ins.imei) res.push(t("r_imei"));
+  if (ins.imei) res.push(l.imeiBad ? t("r_imeiBad") : t("r_imei"));
+  if (ins.cam) res.push(l.cam ? t("r_camBad") : t("r_camOk"));
   if (ins.photo) res.push(t("r_photo"));
   return `<div class="scene"><b>${pname(l)}</b><div class="sub">${t("meetIntro",{n:l.seller})}</div></div>
     <div class="photos big">${[0,1,2].map(k=>photo(l,k)).join("")}</div>
     <div class="insp"><button class="btn" data-act="insp" data-k="screen">${t("i_screen")}</button>
       <button class="btn" data-act="insp" data-k="bat">${t("i_bat")}</button>
       <button class="btn" data-act="insp" data-k="imei">${t("i_imei")}</button>
+      <button class="btn" data-act="insp" data-k="cam">${t("i_cam")}</button>
       <button class="btn" data-act="insp" data-k="photo">${t("i_photo")}</button></div>
     ${res.map(r=>`<div class="res">${r}</div>`).join("")}
     <div style="height:8px"></div>
@@ -782,9 +906,10 @@ V.stock = ()=>{
   if (!S.inv.length) return h + `<p class="empty">${t("stockEmpty")}</p>`;
   h += `<button class="btn wide" data-act="sellall">${t("sellAll")}</button>`;
   S.inv.forEach(p=>{
-    h += `<div class="card"><div class="thumb">${phoneSvg(p,0)}</div>
-      <div class="ct"><div class="nm">${pname(p)}</div><div class="sub">${t("conds")[p.c]} · 🔋${p.bat}% · ${fmt(sellPrice(p))}</div></div>
+    h += `<div class="card col"><div class="thumb">${phoneSvg(p,0)}</div>
+      <div class="ct"><div class="nm">${esc(pname(p))}</div><div class="sub">${t("conds")[p.c]} · 🔋${p.bat}% · ${fmt(sellPrice(p))}</div><div class="sub">${p.imeiBad?"🚫 IMEI ":""}${p.cam?"📷✗ ":""}${p.back?"🔲✗ ":""}${p.ob===false?"🔋~ ":""}</div></div>
       <div class="btns"><button class="btn small" data-act="go" data-v="phone" data-pid="${p.id}">${t("open")}</button>
+      <button class="btn small" style="background:#c2410c" data-act="go" data-v="workshop" data-pid="${p.id}">🔧 ${t("ws_btn")}</button>
       <button class="btn small ghost" data-act="sell" data-pid="${p.id}">${t("sell")}</button></div></div>`;
   });
   return h;
@@ -803,7 +928,50 @@ V.phone = ()=>{
     <div class="row"><span>${t("condition")}</span><b>${t("conds")[p.c]}</b></div>
     <div class="row"><span>${t("worth")}</span><b>${fmt(sellPrice(p))}</b></div>
     <div style="height:14px"></div>
+    <button class="btn wide" style="background:#c2410c" data-act="go" data-v="workshop" data-pid="${p.id}">🔧 ${t("ws_btn")}</button>
+    <div style="height:8px"></div>
     <button class="btn wide" data-act="sell" data-pid="${p.id}">${t("sellFor",{p:fmt(sellPrice(p))})}</button>`;
+};
+V.workshop = ()=>{
+  const p = findP(nav.pid); if (!p) return `<p class="empty">—</p>`;
+  const op = !!p.open;
+  const btn = (k,label,cost,dis) => `<button class="btn wide ${dis?"ghost":""}" data-act="ws" data-k="${k}">${label} · ${fmt(cost)}</button>`;
+  const batTxt = op ? `${p.bat}% · ${t(p.ob===false?"ws_copy":"ws_orig")}` : `${p.bat}% · <small>${t("ws_hidden")}</small>`;
+  let h = `<div class="card"><div class="thumb">${phoneSvg(p,0)}</div><div class="ct"><div class="nm">${esc(pname(p))}</div><div class="sub">${t("worth")}: ${fmt(sellPrice(p))}</div></div></div>
+    <div class="row"><span>${t("ws_screen")}</span><b>${t("conds")[p.c]}</b></div>
+    <div class="row"><span>${t("ws_back")}</span><b>${t(p.back?"ws_backBad":"ws_backOk")}</b></div>
+    <div class="row"><span>${t("ws_bat")}</span><b>${batTxt}</b></div>
+    <div class="row"><span>${t("ws_cam")}</span><b style="color:${p.cam?"var(--bad)":"inherit"}">${t(p.cam?"ws_camBad":"ws_camOk")}</b></div>
+    <div class="row"><span>${t("ws_imei")}</span><b style="color:${p.imeiBad?"var(--bad)":"inherit"}">${t(p.imeiBad?"ws_imeiBad":"ws_imeiOk")}</b></div>
+    <div style="height:12px"></div>`;
+  h += `<button class="btn wide" data-act="ws" data-k="${op?"close":"open"}">${t(op?"ws_close":"ws_open")}</button>`;
+  if (op) h += `<div class="res">${t("ws_opened")}</div>`;
+  h += `<div style="height:6px"></div>`;
+  h += btn("scr", t("ws_fixScr"), wsCost(p,"scr"), p.c>=2);
+  h += btn("back", t("ws_fixBack"), wsCost(p,"back"), !p.back);
+  h += btn("batOrig", t("ws_batOrig"), wsCost(p,"batOrig"), !op);
+  h += btn("batCopy", t("ws_batCopy"), wsCost(p,"batCopy"), !op);
+  h += btn("cam", t("ws_fixCam"), wsCost(p,"cam"), !op || !p.cam);
+  h += btn("imei", t("ws_fixImei"), wsCost(p,"imei"), !op || !p.imeiBad);
+  h += `<div style="height:8px"></div><button class="btn wide ghost" data-act="sell" data-pid="${p.id}">${t("sellFor",{p:fmt(sellPrice(p))})}</button>`;
+  return h;
+};
+const ownValue = sel => Math.round(PKEYS.reduce((a,k)=>a+PARTS[k][sel[k]],0)*1.3);
+function ownBest(){ const sel = {}, miss = []; PKEYS.forEach(k=>{ let b=-1; for (let i=0;i<3;i++) if ((S.parts[k+i]||0)>0) b=i; if (b<0) miss.push(t("pk_"+k)); else sel[k]=b; }); return {sel, miss}; }
+V.own = ()=>{
+  const {sel, miss} = ownBest();
+  let h = `<h2>${t("own_title")}</h2><p class="hint">${t("own_hint")}</p><label class="t">${t("own_parts")}</label>`;
+  PKEYS.forEach(k=>{
+    h += `<div style="font-weight:700;margin:10px 0 4px">${t("pk_"+k)}</div>`;
+    for (let i=0;i<3;i++) h += `<div class="row" style="align-items:center"><span>${t("pt_"+k)[i]} <small>(${t("own_have")}: ${S.parts[k+i]||0})</small></span>
+      <button class="btn small" data-act="own_buy" data-k="${k}" data-i="${i}">${t("own_buy")} · ${fmt(partPrice(k,i))}</button></div>`;
+  });
+  h += `<label class="t" style="margin-top:16px">${t("own_assemble")}</label>
+    <input type="text" data-own="name" maxlength="20" placeholder="${t("own_namePh")}" value="${esc(OWN.name)}" autocomplete="off">`;
+  if (miss.length) h += `<div class="res">${t("own_missing")}${miss.join(", ")}</div>`;
+  else h += `<div class="res">${t("own_will")}<br>${PKEYS.map(k=>t("pt_"+k)[sel[k]]).join(" · ")}<br><b>${t("own_value")}: ${fmt(ownValue(sel))}</b></div>`;
+  h += `<button class="btn wide ${miss.length?"ghost":""}" data-act="own_build">${t("own_build")}</button>`;
+  return h;
 };
 V.gallery = ()=>{
   const p = findP(nav.pid); if (!p) return `<p class="empty">—</p>`;
@@ -821,13 +989,16 @@ V.onboard = ()=>{
     <p class="hint">${t("ob_emoji")}</p>
     <div class="emojis">${EMOJIS.map(e=>`<button class="${OB.avatar==="emoji:"+e?"on":""}" data-act="ob_emoji" data-e="${e}">${e}</button>`).join("")}</div>
     <label class="t" style="text-align:left">${t("ob_nick")}</label>
-    <input type="text" data-ob="nick" maxlength="16" placeholder="${t("ob_nickPh")}" value="${esc(OB.nick)}" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <input type="text" data-ob="nick" maxlength="16" placeholder="${t("ob_nickPh")}" value="${esc(OB.nick)}" ${first?"":"readonly"} autocomplete="off" autocapitalize="off" spellcheck="false">
+    ${first?"":`<p class="hint">${t("ob_locked")}</p>`}
+    <div id="ownerBox" style="display:${first && OB.nick.trim().toLowerCase()===OWNER_NICK.toLowerCase()?"block":"none"};text-align:left"><div class="res">${t("ob_owner")}</div>
+      <input type="password" data-ob="pass" placeholder="${t("ob_pass")}" autocomplete="off"></div>
     ${OB.err?`<div class="res" style="color:var(--bad)">${esc(OB.err)}</div>`:""}
     <button class="btn wide" data-act="ob_save">${t(first?"ob_start":"ob_save")}</button></div>`;
 };
 V.profile = ()=>{
   const value = S.inv.reduce((a,it)=>a+sellPrice(it),0);
-  return `<div style="text-align:center;margin-bottom:10px">${avatarHTML(S.profile&&S.profile.avatar,96)}<h2>@${esc(S.profile&&S.profile.nick)}</h2></div>
+  return `<div style="text-align:center;margin-bottom:10px">${avatarHTML(S.profile&&S.profile.avatar,96)}<h2>@${esc(S.profile&&S.profile.nick)}${S.profile&&S.profile.owner?` <span class="tag" style="background:#d4a017">👑 ${t("owner_badge")}</span>`:""}</h2></div>
     <button class="btn ghost wide" data-act="edit_profile">${t("profile_edit")}</button>
     <div class="row"><span>${t("day")}</span><b>${S.day}</b></div>
     <div class="row"><span>${t("money")}</span><b>${moneyStr()}</b></div>
@@ -871,6 +1042,7 @@ V.owner = ()=>{
       : `<label class="t">Секрет базы (Firebase)</label><input type="password" id="owSecret" placeholder="вставь секрет" autocomplete="off">
          <button class="btn wide" data-act="ow_secret">Сохранить секрет</button>`;
   }
+  if (live) h += `<button class="btn ghost wide" data-act="ow_reserve">🔒 Зарезервировать ник QOOX в базе</button>`;
   h += `<label class="t">⚡ Быстрые события (жми и сразу у всех)</label>` +
     PRESETS.map((p,i)=>`<button class="btn wide" data-act="ow_preset" data-i="${i}">${p.label}</button>`).join("");
   h += `<label class="t">✍️ Своё событие или сообщение</label>
@@ -899,7 +1071,7 @@ V.owner = ()=>{
   return h;
 };
 
-const TITLES = {ads:"app_ads",listing:"listingTitle",chats:"chatsTitle",chat:"chatsTitle",meet:"meetTitle",stock:"stockTitle",
+const TITLES = {ads:"app_ads",listing:"listingTitle",chats:"chatsTitle",chat:"chatsTitle",meet:"meetTitle",stock:"stockTitle",workshop:"ws_title",own:"own_title",
   phone:"phoneTitle",gallery:"galleryTitle",profile:"profileTitle",onboard:"profileTitle",settings:"settingsTitle",admin:"adminTitle",owner:"ownerTitle"};
 
 let lastView = null;
@@ -915,7 +1087,7 @@ function render(){
       <p>${esc(ptext(modal))}</p>${effLine(modal)}
       <div class="btns"><button class="btn" data-act="closemodal">${t("ev_ok")}</button></div></div></div>` : "";
   $app.innerHTML = `
-    <div class="status"><span data-act="go" data-v="profile">${avatarHTML(S.profile.avatar,42)}</span><div class="info"><div class="money">💰 ${moneyStr()}</div>
+    <div class="status"><span data-act="go" data-v="profile">${avatarHTML(S.profile.avatar,42)}${S.profile.owner?"👑":""}</span><div class="info"><div class="money">💰 ${moneyStr()}</div>
       <div class="meta">${t("day")} ${S.day} · ${t("demand")} ×${demandNow()}</div></div>
       <button class="chip" data-act="next">⏭ ${t("nextDay")}</button></div>
     ${bar}<main class="${v==="chat"?"chat":""}">${V[v]()}</main>
@@ -953,7 +1125,7 @@ function chatAct(l, a, f){
 }
 function newPhone(m, c, paid){
   return {id:S.nextId++, m, c, bat:between(BAT[c][0],BAT[c][1]), gb:pick([64,128,256]),
-    imei:String(1e14+Math.floor(Math.random()*9e14)), seed:rnd(1e9), paid:paid||0};
+    imei:String(1e14+Math.floor(Math.random()*9e14)), seed:rnd(1e9), paid:paid||0, ob:true, back:false, cam:false, imeiBad:false};
 }
 
 /* ---------- действия ---------- */
@@ -971,7 +1143,7 @@ function act(a, d){
       const price = Math.max(1, Math.round(l.chat.price*pm()));
       if (!S.inf && S.money < price){ toast(t("noMoney")); return; }
       if (!S.inf) S.money -= price;
-      S.inv.push({id:l.id,m:l.m,c:l.c,bat:l.bat,gb:l.gb,imei:l.imei,seed:l.seed,paid:price});
+      S.inv.push({id:l.id,m:l.m,c:l.c,bat:l.bat,gb:l.gb,imei:l.imei,seed:l.seed,paid:price,ob:l.ob,back:l.back,cam:l.cam,imeiBad:l.imeiBad});
       S.listings = S.listings.filter(x=>x.id!==l.id); save();
       toast(`${t("bought")}: ${pname(l)}`); stack = []; nav = {view:"stock"}; break;
     }
@@ -1005,17 +1177,47 @@ function act(a, d){
       save(); break;
     }
     case "soon": toast(t("pm_toast")); return;
+    case "own_buy": {
+      const k = d.k, i = +d.i, pr = partPrice(k,i);
+      if (!PARTS[k] || !(i>=0 && i<3)) return;
+      if (!S.inf && S.money < pr){ toast(t("noMoney")); return; }
+      if (!S.inf) S.money -= pr;
+      S.parts[k+i] = (S.parts[k+i]||0)+1; save(); break;
+    }
+    case "own_build": {
+      const {sel, miss} = ownBest();
+      if (miss.length){ toast(t("own_missing")+miss.join(", ")); return; }
+      PKEYS.forEach(k=>S.parts[k+sel[k]]--);
+      const val = ownValue(sel), nm = (OWN.name||"").trim() || "QOOX One";
+      S.inv.push({id:S.nextId++, m:OWN_LOOK, c:3, bat:100, gb:128, imei:String(1e14+Math.floor(Math.random()*9e14)), seed:rnd(1e9), paid:0,
+        ob:true, back:false, cam:false, imeiBad:false, custom:{name:nm, val}});
+      OWN.name = ""; save(); toast(t("own_built")); break;
+    }
+    case "ws": {
+      const p = findP(nav.pid); if (!p) return; const k = d.k;
+      if (k === "open"){ p.open = true; save(); break; }
+      if (k === "close"){ p.open = false; save(); break; }
+      const needOpen = ["batOrig","batCopy","cam","imei"].includes(k);
+      if (needOpen && !p.open){ toast(t("ws_needOpen")); return; }
+      if (k==="scr" && p.c>=2){ toast(t("ws_screenGood")); return; }
+      if (k==="back" && !p.back){ toast(t("ws_noNeed")); return; }
+      if (k==="cam" && !p.cam){ toast(t("ws_noNeed")); return; }
+      if (k==="imei" && !p.imeiBad){ toast(t("ws_noNeed")); return; }
+      const cost = wsCost(p,k);
+      if (!S.inf && S.money < cost){ toast(t("noMoney")); return; }
+      if (!S.inf) S.money -= cost;
+      if (k==="scr") p.c = 2;
+      else if (k==="back") p.back = false;
+      else if (k==="batOrig"){ p.bat = 100; p.ob = true; }
+      else if (k==="batCopy"){ p.bat = between(85,95); p.ob = false; }
+      else if (k==="cam") p.cam = false;
+      else if (k==="imei") p.imeiBad = false;
+      save(); toast(t("ws_done")); break;
+    }
     case "ob_pick": { const f = document.getElementById("obFile"); if (f) f.click(); return; }
     case "ob_tg": OB.avatar = tgUser().photo_url || OB.avatar; break;
     case "ob_emoji": OB.avatar = "emoji:"+d.e; break;
-    case "ob_save": {
-      const nk = (OB.nick||"").trim();
-      if (!OB.avatar){ OB.err = t("ob_needAvatar"); break; }
-      if (!nickOk(nk)){ OB.err = t("ob_err"); break; }
-      S.profile = {nick:nk, avatar:OB.avatar}; OB.err = ""; save();
-      if (stack.length) back(); else home();
-      break;
-    }
+    case "ob_save": saveProfile().then(render); return;
     case "edit_profile": startOnboard(true); go("onboard"); break;
     case "closemodal": {
       if (!modal) break;
@@ -1054,6 +1256,13 @@ function act(a, d){
       if (v.trim()){ try { localStorage.setItem("owner_secret", v.trim()); } catch(e){} toast("Секрет сохранён"); }
       break;
     }
+    case "ow_reserve": {
+      const sec = owSecret(); if (!sec){ toast("Сначала введи секрет базы"); return; }
+      fetch(LIVE_URL.replace(/\/$/,"")+"/nicks/"+encodeURIComponent(OWNER_NICK.toLowerCase())+".json?auth="+encodeURIComponent(sec),
+        {method:"PUT", body:JSON.stringify({uid:"owner", t:{".sv":"timestamp"}})})
+        .then(r=>toast(r.ok ? "🔒 Ник QOOX зарезервирован в базе" : "❌ Ошибка "+r.status), ()=>toast("❌ Нет связи с базой"));
+      return;
+    }
     case "ow_secretclear": try { localStorage.removeItem("owner_secret"); } catch(e){} break;
     case "ow_copy": {
       const ta = document.getElementById("owJson");
@@ -1074,6 +1283,8 @@ $app.addEventListener("input", e=>{
   const d = e.target.dataset||{};
   if (d.ow) OW[d.ow] = e.target.value;
   if (d.ob) OB[d.ob] = e.target.value;
+  if (d.own) OWN[d.own] = e.target.value;
+  if (d.ob === "nick"){ const bx = document.getElementById("ownerBox"); if (bx) bx.style.display = e.target.value.trim().toLowerCase()===OWNER_NICK.toLowerCase() ? "block" : "none"; }
 });
 $app.addEventListener("change", e=>{ if (e.target.id === "obFile") handleFile(e.target.files[0]); });
 

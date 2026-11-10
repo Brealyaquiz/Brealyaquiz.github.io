@@ -688,7 +688,7 @@ const specOf = m => SPEC[PHONES[m][0]] || SPEC["🧪 Test Phone"];
 // Настоящие фото моделей: "OnePlus 15": ["op15/1.jpg","op15/2.jpg","op15/3.jpg"]; если пусто — рисуется картинка
 const REAL = {};
 // Фото, которые лежат в галерее каждого телефона вместе со снимками самого телефона
-const GALLERY_EXTRA = ["gallery/egg.jpg","gallery/egg2.jpg"];
+const GALLERY_EXTRA = ["gallery/egg.jpg","gallery/egg2.jpg","gallery/egg3.jpg"];
 const thumb = (it,k) => { const r = REAL[pname(it)]; return r && r[k||0] ? `<img src="${esc(r[k||0])}" alt="" style="width:100%;height:100%;object-fit:contain">` : phoneSvg(it, k||0); };
 function photo(it, k){
   const r = REAL[pname(it)];

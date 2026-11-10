@@ -156,6 +156,8 @@ const LIVE_URL = "https://admin-abuse-7ced8-default-rtdb.firebaseio.com";   // �
 const SAVE_KEY = "phone_resale_v2";
 const START_MONEY = 500;
 // Аккаунт владельца: ник QOOX открывается только по паролю (в коде хранится не пароль, а его SHA-256)
+// Версия профилей: чтобы все игроки заново создали аккаунт, увеличь это число и выложи игру заново
+const PROFILE_EPOCH = 2;
 const OWNER_NICK = "QOOX";
 const OWNER_PASS_HASH = "366c8c973de0a543b7271b00384206cf41f4e2af0e821c4b4b24c798ea6d2955";
 const RESERVED = ["qoox","admin","owner","moderator","support","bot","vladelec","владелец","админ"];
@@ -356,6 +358,7 @@ function load(){
       const s = JSON.parse(raw);
       if (s && Array.isArray(s.inv) && Array.isArray(s.listings) && I[s.lang]){
         s.seen = s.seen || {}; s.wipes = s.wipes || {}; s.parts = s.parts || {};
+        if (s.profile && (s.profile.epoch||1) < PROFILE_EPOCH) s.profile = null;   // старый профиль: нужно создать заново
         if (!s.langSet) s.lang = detectLang();   // пока язык не выбран вручную, следуем языку Телеграма
         return s;
       }
@@ -591,7 +594,7 @@ async function saveProfile(){
     if (r === "taken"){ OB.err = t("ob_taken"); return; }
     if (r === "err"){ OB.err = t("ob_net"); return; }
   }
-  S.profile = {nick: owner ? OWNER_NICK : nk, avatar: OB.avatar, owner}; save();
+  S.profile = {nick: owner ? OWNER_NICK : nk, avatar: OB.avatar, owner, epoch: PROFILE_EPOCH}; save();
   if (stack.length) back(); else home();
 }
 function handleFile(f){
@@ -1048,7 +1051,7 @@ V.owner = ()=>{
       : `<label class="t">Секрет базы (Firebase)</label><input type="password" id="owSecret" placeholder="вставь секрет" autocomplete="off">
          <button class="btn wide" data-act="ow_secret">Сохранить секрет</button>`;
   }
-  if (live) h += `<button class="btn ghost wide" data-act="ow_reserve">🔒 Зарезервировать ник QOOX в базе</button>`;
+  if (live) h += `<button class="btn ghost wide" data-act="ow_reserve">🔒 Зарезервировать ник QOOX в базе</button><button class="btn ghost wide" data-act="ow_clearnicks">🧹 Освободить ВСЕ ники (и снова занять QOOX)</button>`;
   h += `<label class="t">⚡ Быстрые события (жми и сразу у всех)</label>` +
     PRESETS.map((p,i)=>`<button class="btn wide" data-act="ow_preset" data-i="${i}">${p.label}</button>`).join("");
   h += `<label class="t">✍️ Своё событие или сообщение</label>
@@ -1267,6 +1270,16 @@ function act(a, d){
       fetch(LIVE_URL.replace(/\/$/,"")+"/nicks/"+encodeURIComponent(OWNER_NICK.toLowerCase())+".json?auth="+encodeURIComponent(sec),
         {method:"PUT", body:JSON.stringify({uid:"owner", t:{".sv":"timestamp"}})})
         .then(r=>toast(r.ok ? "🔒 Ник QOOX зарезервирован в базе" : "❌ Ошибка "+r.status), ()=>toast("❌ Нет связи с базой"));
+      return;
+    }
+    case "ow_clearnicks": {
+      const sec = owSecret(); if (!sec){ toast("Сначала введи секрет базы"); return; }
+      if (!confirm("Освободить все ники? Игроки смогут заново занять любые ники.")) return;
+      const base = LIVE_URL.replace(/\/$/,"");
+      fetch(base+"/nicks.json?auth="+encodeURIComponent(sec), {method:"DELETE"})
+        .then(r=>{ if (!r.ok) throw r.status;
+          return fetch(base+"/nicks/"+encodeURIComponent(OWNER_NICK.toLowerCase())+".json?auth="+encodeURIComponent(sec), {method:"PUT", body:JSON.stringify({uid:"owner", t:{".sv":"timestamp"}})}); })
+        .then(r=>toast(r.ok ? "🧹 Ники освобождены, QOOX занят" : "❌ Ошибка "+r.status), e=>toast("❌ Ошибка "+e));
       return;
     }
     case "ow_secretclear": try { localStorage.removeItem("owner_secret"); } catch(e){} break;

@@ -68,7 +68,11 @@ h2{margin:0 0 4px;font-size:21px}
 .btn.wide{width:100%;margin-bottom:12px}
 .btn.small{min-height:48px;padding:0 14px;font-size:15px}
 .btns{display:flex;gap:8px;flex-shrink:0}
-.card.col{flex-wrap:wrap}.card.col .btns{width:100%;flex-shrink:1}.card.col .btns .btn{flex:1;padding:0 6px;font-size:14px}
+.wsvis{margin:4px 0 12px}
+.wscover.off{transform:translateY(240px)}.wscover.off.anim{animation:wsOff .7s ease-in}.wscover.on.anim{animation:wsOn .7s ease-out}
+@keyframes wsOff{from{transform:translateY(0)}to{transform:translateY(240px)}}
+@keyframes wsOn{from{transform:translateY(240px)}to{transform:translateY(0)}}
+.card.col{flex-wrap:wrap}.card.col .btns{width:100%;flex-shrink:1}.card.col .btns .btn{flex:1;padding:0 4px;font-size:13px;white-space:nowrap}
 .row{display:flex;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid var(--bg2)}
 .row b{font-weight:700;text-align:right}
 .seg{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
@@ -104,6 +108,7 @@ textarea{min-height:64px;resize:vertical}
 .frame{border-radius:34px;padding:22px 16px;margin:4px auto 16px;max-width:260px;min-height:380px;
   box-shadow:0 8px 24px #0004,inset 0 0 0 6px #111}
 .frame .home{padding:8px 0;gap:14px 4px}
+.frame .cut{position:absolute;background:#000;z-index:2}
 .frame .app{color:#fff;text-shadow:0 1px 3px #0008}
 .frame .app .ic{width:64px;height:64px;font-size:32px}
 .clock{text-align:center;color:#fff;font-size:34px;font-weight:700;text-shadow:0 1px 4px #0006}
@@ -683,7 +688,8 @@ const specOf = m => SPEC[PHONES[m][0]] || SPEC["🧪 Test Phone"];
 // Настоящие фото моделей: "OnePlus 15": ["op15/1.jpg","op15/2.jpg","op15/3.jpg"]; если пусто — рисуется картинка
 const REAL = {};
 // Фото, которые лежат в галерее каждого телефона вместе со снимками самого телефона
-const GALLERY_EXTRA = ["gallery/egg.jpg"];
+const GALLERY_EXTRA = ["gallery/egg.jpg","gallery/egg2.jpg"];
+const thumb = (it,k) => { const r = REAL[pname(it)]; return r && r[k||0] ? `<img src="${esc(r[k||0])}" alt="" style="width:100%;height:100%;object-fit:contain">` : phoneSvg(it, k||0); };
 function photo(it, k){
   const r = REAL[pname(it)];
   return r && r[k] ? `<img src="${esc(r[k])}" alt="">` : phoneSvg(it, k);
@@ -712,34 +718,116 @@ function cracks(R, c, x0, y0, w, h){
   return s;
 }
 function lens(x, y, r, id){
-  return `<circle cx="${x}" cy="${y}" r="${r}" fill="#a9afb6"/><circle cx="${x}" cy="${y}" r="${r-1.3}" fill="#17171b"/>
-    <circle cx="${x}" cy="${y}" r="${r*0.64}" fill="url(#${id}l)"/><circle cx="${x-r*0.28}" cy="${y-r*0.28}" r="${r*0.2}" fill="#fff" fill-opacity=".8"/>`;
+  return `<circle cx="${x}" cy="${y}" r="${r+1.2}" fill="#000" fill-opacity=".3"/><circle cx="${x}" cy="${y}" r="${r}" fill="url(#${id}m)"/><circle cx="${x}" cy="${y}" r="${r-1.3}" fill="#111218"/>
+    <circle cx="${x}" cy="${y}" r="${r-2.4}" fill="#07080d" stroke="#2b2f3d" stroke-width=".5"/><circle cx="${x}" cy="${y}" r="${r*0.6}" fill="url(#${id}l)"/><circle cx="${x}" cy="${y}" r="${r*0.28}" fill="#02030a" fill-opacity=".85"/>
+    <path d="M${x-r*0.5} ${y-r*0.1} A${r*0.52} ${r*0.52} 0 0 1 ${x+r*0.1} ${y-r*0.5}" fill="none" stroke="#b69cff" stroke-opacity=".7" stroke-width="${Math.max(.6,r*0.09)}" stroke-linecap="round"/>
+    <circle cx="${x-r*0.3}" cy="${y-r*0.32}" r="${r*0.14}" fill="#fff" fill-opacity=".9"/>`;
 }
 const mod = (x,y,w,h,rx) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="#0a0a0f" fill-opacity=".4" stroke="#fff" stroke-opacity=".4" stroke-width=".9"/>`;
 
+/* профили передней панели: у каждой модели свои рамки, углы, вырез камеры, кнопки и интерфейс */
+const FP = {
+ "iPhone 11":{os:"ios",bz:5.4,ch:5.4,r:21,edge:"round",cut:"notch",nw:40,nh:12,btn:"ios"},
+ "iPhone 12":{os:"ios",bz:4.2,ch:4.2,r:17,edge:"flat",cut:"notch",nw:36,nh:11,btn:"ios"},
+ "iPhone 13":{os:"ios",bz:4.2,ch:4.2,r:17,edge:"flat",cut:"notch",nw:30,nh:10,btn:"ios"},
+ "iPhone 14":{os:"ios",bz:4.0,ch:4.0,r:17,edge:"flat",cut:"notch",nw:30,nh:10,btn:"ios"},
+ "iPhone 15 Pro":{os:"ios",bz:2.9,ch:2.9,r:19,edge:"flat",cut:"island",btn:"ios"},
+ "Galaxy A54":{os:"onui",bz:4.8,ch:8,r:14,edge:"flat",cut:"hole",btn:"sam"},
+ "Galaxy S21":{os:"onui",bz:3.4,ch:4,r:20,edge:"round",cut:"hole",btn:"sam"},
+ "Galaxy S23":{os:"onui",bz:3.4,ch:3.6,r:18,edge:"flat",cut:"hole",btn:"sam"},
+ "Pixel 7":{os:"pixel",bz:4.4,ch:6,r:20,edge:"round",cut:"hole",btn:"pix"},
+ "Pixel 8":{os:"pixel",bz:4.0,ch:5,r:25,edge:"round",cut:"hole",btn:"pix"},
+ "Redmi Note 12":{os:"miui",bz:5,ch:9.5,r:12,edge:"flat",cut:"hole",btn:"sam"},
+ "Xiaomi 13":{os:"miui",bz:2.5,ch:3.2,r:21,edge:"curve",cut:"hole",btn:"sam"},
+ "OnePlus 11":{os:"oxy",bz:2.7,ch:3.4,r:22,edge:"curve",cut:"holeL",btn:"op"},
+ "OnePlus 15":{os:"oxy",bz:2.4,ch:2.8,r:23,edge:"curve",cut:"holeL",btn:"op"},
+ "Nothing Phone 2":{os:"nothing",bz:4.2,ch:4.8,r:15,edge:"flat",cut:"hole",btn:"sam"}
+};
+const FPDEF = {os:"onui",bz:4,ch:5,r:19,edge:"flat",cut:"hole",btn:"sam"};
+const fpOf = it => FP[PHONES[it.m][0]] || FPDEF;
+const SIDEBTN = {
+  ios:[["L",40,8],["L",56,14],["L",74,14],["R",66,24]],
+  sam:[["R",50,22],["R",82,14]],
+  pix:[["R",52,14,1],["R",74,24]],
+  op:[["L",56,26],["R",40,10],["R",66,18]]
+};
+function sideBtns(fp, sp){
+  return (SIDEBTN[fp.btn]||SIDEBTN.sam).map(([sd,y,h,acc])=>`<rect x="${sd==="L"?2.6:114.4}" y="${y}" width="3" height="${h}" rx="1.4" fill="${acc?sp.body:sp.frame}"/><rect x="${sd==="L"?2.6:114.4}" y="${y}" width="1.1" height="${h}" rx=".5" fill="#fff" fill-opacity=".35"/>`).join("");
+}
+function statusBar(tx, y, shrink){
+  const g = `<g fill="#fff"><rect x="58" y="${y-2.6}" width="1.6" height="2.6" rx=".5"/><rect x="60.6" y="${y-3.8}" width="1.6" height="3.8" rx=".5"/><rect x="63.2" y="${y-5}" width="1.6" height="5" rx=".5"/><rect x="65.8" y="${y-6.2}" width="1.6" height="6.2" rx=".5" fill-opacity=".45"/></g>
+    <path d="M70.6 ${y-4.6} q3.6 -3.2 7.2 0 M72.2 ${y-2.8} q2 -1.8 4 0" fill="none" stroke="#fff" stroke-width="1" stroke-linecap="round"/><circle cx="74.2" cy="${y-1}" r=".8" fill="#fff"/>
+    <rect x="81" y="${y-5.4}" width="11" height="5.6" rx="1.7" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width=".8"/><rect x="82.2" y="${y-4.2}" width="7.6" height="3.2" rx=".9" fill="#fff"/><rect x="92.4" y="${y-3.4}" width="1" height="1.8" rx=".4" fill="#fff" fill-opacity=".8"/>`;
+  return `<text x="${tx}" y="${y}" font-size="6.4" font-weight="700" font-family="sans-serif" fill="#fff">12:30</text>` +
+    (shrink ? `<g transform="translate(98 0) scale(.72) translate(-98 0)">${g}</g>` : g);
+}
+function screenInner(it, sp, fp, R){
+  const os = fp.os, rx = {ios:4.8,onui:6.4,pixel:8,miui:5.2,oxy:8,nothing:8}[os];
+  const pal = os==="nothing" ? ["#fff"] : ["#ff6b6b","#feca57","#48dbfb","#1dd1a1","#5f27cd","#ff9ff3","#54a0ff","#c8d6e5"];
+  const icon = (x,y,sz,lab)=>{
+    if (os==="nothing") return `<circle cx="${x+sz/2}" cy="${y+sz/2}" r="${sz/2-.6}" fill="#fff" fill-opacity=".07" stroke="#fff" stroke-opacity=".75" stroke-width=".8"/><circle cx="${x+sz/2}" cy="${y+sz/2}" r="1.5" fill="#fff"/>`;
+    const c = pal[Math.floor(R()*pal.length)];
+    return `<rect x="${x}" y="${y}" width="${sz}" height="${sz}" rx="${rx}" fill="${c}"/><rect x="${x}" y="${y}" width="${sz}" height="${sz*0.5}" rx="${rx}" fill="#fff" fill-opacity=".16"/>` +
+      (lab ? `<rect x="${x+sz*0.12}" y="${y+sz+2.4}" width="${sz*0.76}" height="1.8" rx=".9" fill="#fff" fill-opacity=".75"/>` : "");
+  };
+  const grid = (y0,rows,step)=>{ let o=""; for (let r=0;r<rows;r++) for (let c=0;c<4;c++) o += icon(7+c*22,y0+r*step,16,os!=="nothing"); return o; };
+  const dock = (y,glass)=>{ let o = glass ? `<rect x="3" y="${y-3}" width="92" height="22" rx="9" fill="#fff" fill-opacity=".26"/>` : ""; for (let c=0;c<4;c++) o += icon(7+c*22,y,16,false); return o; };
+  const pill = (y)=>`<rect x="33" y="${y}" width="32" height="2.4" rx="1.2" fill="#fff" fill-opacity=".92"/>`;
+  const gsearch = (y)=>`<rect x="5" y="${y}" width="88" height="14" rx="7" fill="#fff" fill-opacity=".93"/><circle cx="14" cy="${y+7}" r="3.4" fill="none" stroke="#4285f4" stroke-width="1.6" stroke-dasharray="4 3"/><circle cx="14" cy="${y+7}" r="3.4" fill="none" stroke="#ea4335" stroke-width="1.6" stroke-dasharray="3 10"/><rect x="24" y="${y+5.8}" width="30" height="2.4" rx="1.2" fill="#9aa0a6"/><circle cx="84" cy="${y+7}" r="2.4" fill="#34a853"/>`;
+  let s = `<circle cx="82" cy="30" r="46" fill="#fff" fill-opacity=".12"/><circle cx="10" cy="160" r="52" fill="#000" fill-opacity=".14"/>`;
+  if (os==="nothing") s += `<rect width="98" height="202" fill="#000" fill-opacity=".5"/>`;
+  const shrink = fp.cut==="notch" || fp.cut==="island";
+  const tx = fp.cut==="holeL" ? 19 : 8, sy = fp.cut==="notch" ? 13 : (fp.cut==="island"?13.5:12.5);
+  s += statusBar(tx, sy, shrink);
+  if (os==="ios"){
+    s += `<text x="49" y="58" text-anchor="middle" font-size="27" font-family="sans-serif" font-weight="300" fill="#fff">12:30</text>
+      <text x="49" y="70" text-anchor="middle" font-size="6.6" font-family="sans-serif" fill="#fff" fill-opacity=".9">Mon, 9 Nov</text>`;
+    s += grid(86,3,26) + dock(179,true) + pill(196);
+  } else if (os==="onui"){
+    s += `<text x="8" y="48" font-size="25" font-family="sans-serif" font-weight="300" fill="#fff">12:30</text><text x="8" y="59" font-size="6.2" font-family="sans-serif" fill="#fff" fill-opacity=".9">Mon, 9 Nov  ·  18°</text>`;
+    s += grid(76,3,25) + gsearch(152) + dock(176,false) + pill(197);
+  } else if (os==="pixel"){
+    s += `<text x="8" y="40" font-size="7" font-family="sans-serif" font-weight="600" fill="#fff">Mon, 9 Nov</text><circle cx="52" cy="38" r="2.4" fill="#ffd54a"/><text x="57" y="40" font-size="7" font-family="sans-serif" font-weight="600" fill="#fff">18°</text>
+      <text x="8" y="68" font-size="29" font-family="sans-serif" font-weight="400" fill="#fff" fill-opacity=".95">12:30</text>`;
+    s += grid(88,3,25) + gsearch(160) + dock(180,false) + pill(197);
+  } else if (os==="miui"){
+    s += `<text x="49" y="40" text-anchor="middle" font-size="19" font-family="sans-serif" font-weight="300" fill="#fff">12:30</text><text x="49" y="49" text-anchor="middle" font-size="5.8" font-family="sans-serif" fill="#fff" fill-opacity=".9">Mon, 9 Nov</text>`;
+    s += grid(60,4,27) + `<circle cx="43" cy="169" r="1.3" fill="#fff"/><circle cx="49" cy="169" r="1.3" fill="#fff" fill-opacity=".45"/><circle cx="55" cy="169" r="1.3" fill="#fff" fill-opacity=".45"/>` + dock(179,false) + pill(197);
+  } else if (os==="oxy"){
+    s += `<text x="49" y="54" text-anchor="middle" font-size="24" font-family="sans-serif" font-weight="200" fill="#fff">12:30</text><text x="49" y="65" text-anchor="middle" font-size="6" font-family="sans-serif" fill="#fff" fill-opacity=".9">Mon, 9 Nov</text>`;
+    s += grid(84,3,26) + dock(179,false) + pill(197);
+  } else {
+    s += `<text x="49" y="70" text-anchor="middle" font-size="30" font-family="monospace" font-weight="900" fill="none" stroke="#fff" stroke-width="1.5" stroke-dasharray="1 1.7">12:30</text>
+      <text x="49" y="82" text-anchor="middle" font-size="5.6" font-family="monospace" fill="#fff" fill-opacity=".8">MON 09 NOV</text>`;
+    s += grid(98,3,25) + dock(179,false) + pill(197);
+  }
+  s += cracks(R, it.c, 0, 0, 98, 202);
+  // вырез под камеру
+  if (fp.cut==="notch"){ const w=fp.nw,h=fp.nh,x0=49-w/2; s += `<path d="M${x0-4} 0 q4 0 4 4 v${h-8} q0 4 4 4 h${w-8} q4 0 4 -4 v-${h-8} q0 -4 4 -4z" fill="#07070a"/><rect x="${49-6}" y="${h*0.35}" width="12" height="1.8" rx=".9" fill="#2a2a33"/><circle cx="${49+10}" cy="${h*0.42}" r="1.3" fill="#1a2340"/>`; }
+  else if (fp.cut==="island") s += `<rect x="34" y="4.5" width="30" height="9.5" rx="4.75" fill="#000"/><circle cx="58.4" cy="9.2" r="1.9" fill="#101a33"/><circle cx="57.8" cy="8.6" r=".6" fill="#7aa2ff"/>`;
+  else if (fp.cut==="holeL") s += `<circle cx="11" cy="7.2" r="3" fill="#000"/><circle cx="10.4" cy="6.6" r=".9" fill="#2a3a5a"/>`;
+  else s += `<circle cx="49" cy="7" r="3" fill="#000"/><circle cx="48.3" cy="6.3" r=".9" fill="#2a3a5a"/>`;
+  return s;
+}
 function frontInner(it, uid){
-  const R = rng(it.seed+1), sp = specOf(it.m);
+  const R = rng(it.seed+1), sp = specOf(it.m), fp = fpOf(it);
+  const ft = fp.edge==="round" ? 1.5 : 2.3, sx = 5+fp.bz, sy = 3+fp.bz, sw = 110-2*fp.bz, sh = 214-fp.bz-fp.ch, sr = Math.max(fp.r-fp.bz+1.6, 5);
   let s = `<defs>
     <linearGradient id="${uid}w" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${sp.wall[0]}"/><stop offset="1" stop-color="${sp.wall[1]}"/></linearGradient>
-    <linearGradient id="${uid}f" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${sp.frame}"/><stop offset=".5" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="${sp.frame}"/></linearGradient>
+    <linearGradient id="${uid}f" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset=".12" stop-color="#fff" stop-opacity=".05"/><stop offset=".88" stop-color="#000" stop-opacity=".06"/><stop offset="1" stop-color="#000" stop-opacity=".4"/></linearGradient>
     <linearGradient id="${uid}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
-    <clipPath id="${uid}c"><rect x="11" y="9" width="98" height="202" rx="14"/></clipPath></defs>`;
-  s += `<rect x="3" y="52" width="3" height="16" rx="1.5" fill="${sp.frame}"/><rect x="3" y="74" width="3" height="16" rx="1.5" fill="${sp.frame}"/><rect x="114" y="66" width="3" height="26" rx="1.5" fill="${sp.frame}"/>`;
-  s += `<rect x="5" y="3" width="110" height="214" rx="21" fill="url(#${uid}f)"/><rect x="8" y="6" width="104" height="208" rx="18" fill="#08080b"/>`;
-  s += `<rect x="11" y="9" width="98" height="202" rx="14" fill="url(#${uid}w)"/><g clip-path="url(#${uid}c)">`;
-  s += `<circle cx="92" cy="40" r="46" fill="#fff" fill-opacity=".12"/><circle cx="20" cy="172" r="52" fill="#000" fill-opacity=".14"/>`;
-  s += `<text x="20" y="22" font-size="7" font-family="sans-serif" font-weight="700" fill="#fff">12:30</text>
-    <rect x="86" y="16" width="13" height="6" rx="1.8" fill="none" stroke="#fff" stroke-width=".8"/><rect x="87.3" y="17.3" width="8" height="3.4" rx=".8" fill="#fff"/>
-    <text x="60" y="74" text-anchor="middle" font-size="26" font-family="sans-serif" font-weight="300" fill="#fff">12:30</text>
-    <text x="60" y="86" text-anchor="middle" font-size="6.5" font-family="sans-serif" fill="#fff" fill-opacity=".85">Mon, 9 Nov</text>`;
-  const pal = ["#ff6b6b","#feca57","#48dbfb","#1dd1a1","#5f27cd","#ff9ff3","#54a0ff","#c8d6e5"];
-  for (let r=0;r<3;r++) for (let c=0;c<4;c++) s += `<rect x="${17+c*22}" y="${104+r*26}" width="16" height="16" rx="4.5" fill="${pal[Math.floor(R()*pal.length)]}"/>`;
-  for (let c=0;c<4;c++) s += `<rect x="${17+c*22}" y="188" width="16" height="16" rx="4.5" fill="#fff" fill-opacity=".85"/>`;
-  s += cracks(R, it.c, 11, 9, 98, 202);
-  s += `<polygon points="11,9 84,9 11,100" fill="url(#${uid}g)"${it.c===3?"":' fill-opacity=".6"'}/></g>`;
-  if (sp.fr === "notch") s += `<path d="M42 9 h36 v3 q0 7 -7 7 h-22 q-7 0 -7 -7z" fill="#08080b"/>`;
-  else if (sp.fr === "island") s += `<rect x="45" y="13" width="30" height="9" rx="4.5" fill="#000"/>`;
-  else s += `<circle cx="60" cy="17" r="3.2" fill="#000"/><circle cx="59" cy="16" r="1" fill="#2a3a5a"/>`;
+    <linearGradient id="${uid}el" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".5"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient>
+    <linearGradient id="${uid}er" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".5"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient>
+    <clipPath id="${uid}c"><rect x="${sx}" y="${sy}" width="${sw}" height="${sh}" rx="${sr}"/></clipPath></defs>`;
+  s += sideBtns(fp, sp);
+  s += `<rect x="5" y="3" width="110" height="214" rx="${fp.r}" fill="${sp.frame}"/><rect x="5" y="3" width="110" height="214" rx="${fp.r}" fill="url(#${uid}f)"/>`;
+  if (fp.edge==="flat") s += `<rect x="5.7" y="3.7" width="108.6" height="212.6" rx="${fp.r-0.7}" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width=".6"/>`;
+  s += `<rect x="5" y="34" width="1.8" height=".9" fill="#000" fill-opacity=".35"/><rect x="113.2" y="34" width="1.8" height=".9" fill="#000" fill-opacity=".35"/><rect x="5" y="188" width="1.8" height=".9" fill="#000" fill-opacity=".35"/><rect x="113.2" y="188" width="1.8" height=".9" fill="#000" fill-opacity=".35"/>`;
+  s += `<rect x="${5+ft}" y="${3+ft}" width="${110-2*ft}" height="${214-2*ft}" rx="${fp.r-ft}" fill="#07070a"/>`;
+  s += `<g clip-path="url(#${uid}c)"><g transform="translate(${sx} ${sy}) scale(${sw/98} ${sh/202})"><rect width="98" height="202" fill="url(#${uid}w)"/>${screenInner(it, sp, fp, R)}`;
+  if (fp.edge==="curve") s += `<rect x="0" y="0" width="7" height="202" fill="url(#${uid}el)"/><rect x="91" y="0" width="7" height="202" fill="url(#${uid}er)"/>`;
+  s += `<polygon points="0,0 74,0 0,92" fill="url(#${uid}g)"${it.c===3?"":' fill-opacity=".6"'}/></g></g>`;
+  s += `<rect x="${sx}" y="${sy}" width="${sw}" height="${sh}" rx="${sr}" fill="none" stroke="#fff" stroke-opacity=".12" stroke-width=".6"/>`;
   return s;
 }
 function backInner(it, uid){
@@ -747,9 +835,11 @@ function backInner(it, uid){
   let s = `<defs>
     <radialGradient id="${id}l" cx=".4" cy=".4"><stop offset="0" stop-color="#3f4f86"/><stop offset="1" stop-color="#04050c"/></radialGradient>
     <linearGradient id="${id}s" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".32"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".32"/></linearGradient>
-    <clipPath id="${id}bc"><rect x="7" y="5" width="106" height="210" rx="19"/></clipPath></defs>`;
-  s += `<rect x="3" y="52" width="3" height="16" rx="1.5" fill="${sp.frame}"/><rect x="114" y="66" width="3" height="26" rx="1.5" fill="${sp.frame}"/><rect x="114" y="98" width="3" height="16" rx="1.5" fill="${sp.frame}"/>`;
-  s += `<rect x="5" y="3" width="110" height="214" rx="21" fill="${sp.frame}"/><rect x="7" y="5" width="106" height="210" rx="19" fill="${sp.body}"/>`;
+    <linearGradient id="${id}m" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4f6fa"/><stop offset=".5" stop-color="#8d939e"/><stop offset="1" stop-color="#d7dbe3"/></linearGradient>
+    <clipPath id="${id}bc"><rect x="7" y="5" width="106" height="210" rx="${fpOf(it).r-2}"/></clipPath></defs>`;
+  const fp = fpOf(it);
+  s += sideBtns(fp, sp);
+  s += `<rect x="5" y="3" width="110" height="214" rx="${fp.r}" fill="${sp.frame}"/><rect x="5" y="3" width="110" height="214" rx="${fp.r}" fill="#fff" fill-opacity=".12"/><rect x="7" y="5" width="106" height="210" rx="${fp.r-2}" fill="${sp.body}"/>`;
   s += `<g clip-path="url(#${id}bc)">`;
   switch (sp.bk){
     case "sq2": s += mod(14,12,46,46,12)+lens(28,26,8,id)+lens(28,44,8,id)+`<circle cx="49" cy="22" r="3" fill="#f7e9b0"/><circle cx="49" cy="34" r="1.4" fill="#222"/>`; break;
@@ -841,7 +931,7 @@ V.ads = ()=>{
   let h = `<h2>${t("adsTitle")}</h2><p class="hint">${t("adsHint")}</p>`;
   if (!S.listings.length) return h + `<p class="empty">${t("adsEmpty")}</p>`;
   S.listings.forEach(l=>{
-    h += `<button class="card" data-act="go" data-v="listing" data-lid="${l.id}"><div class="thumb">${phoneSvg(l,0)}</div>
+    h += `<button class="card" data-act="go" data-v="listing" data-lid="${l.id}"><div class="thumb">${thumb(l,0)}</div>
       <div class="ct"><div class="nm">${pname(l)}</div><div class="sub">${t("conds")[l.c]} · ${l.gb} GB · ${l.seller}</div></div>
       <div class="nm">${bf(l.ask)}</div></button>`;
   });
@@ -865,7 +955,7 @@ V.chats = ()=>{
   if (!list.length) return h + `<p class="empty">${t("noChats")}</p>`;
   list.forEach(l=>{
     const last = l.chat.msgs[l.chat.msgs.length-1];
-    h += `<button class="card" data-act="chat" data-lid="${l.id}"><div class="thumb">${phoneSvg(l,0)}</div>
+    h += `<button class="card" data-act="chat" data-lid="${l.id}"><div class="thumb">${thumb(l,0)}</div>
       <div class="ct"><div class="nm">${l.seller} · ${pname(l)}</div><div class="sub">${esc(last.text)}</div></div></button>`;
   });
   return h;
@@ -915,7 +1005,7 @@ V.stock = ()=>{
   if (!S.inv.length) return h + `<p class="empty">${t("stockEmpty")}</p>`;
   h += `<button class="btn wide" data-act="sellall">${t("sellAll")}</button>`;
   S.inv.forEach(p=>{
-    h += `<div class="card col"><div class="thumb">${phoneSvg(p,0)}</div>
+    h += `<div class="card col"><div class="thumb">${thumb(p,0)}</div>
       <div class="ct"><div class="nm">${esc(pname(p))}</div><div class="sub">${t("conds")[p.c]} · 🔋${p.bat}% · ${fmt(sellPrice(p))}</div><div class="sub">${p.imeiBad?"🚫 IMEI ":""}${p.cam?"📷✗ ":""}${p.back?"🔲✗ ":""}${p.ob===false?"🔋~ ":""}</div></div>
       <div class="btns"><button class="btn small" data-act="go" data-v="phone" data-pid="${p.id}">${t("open")}</button>
       <button class="btn small" style="background:#c2410c" data-act="go" data-v="workshop" data-pid="${p.id}">🔧 ${t("ws_btn")}</button>
@@ -926,7 +1016,11 @@ V.stock = ()=>{
 V.phone = ()=>{
   const p = findP(nav.pid); if (!p) return `<p class="empty">—</p>`;
   const W = specOf(p.m).wall;
-  return `<div class="frame" style="background:linear-gradient(160deg,${W[0]},${W[1]})">
+  const fp = fpOf(p), cut = {notch:`<i class="cut" style="top:0;left:50%;margin-left:-${fp.nw||34}px;width:${(fp.nw||34)*2}px;height:${(fp.nh||10)*2.4}px;border-radius:0 0 18px 18px"></i>`,
+    island:`<i class="cut" style="top:12px;left:50%;margin-left:-38px;width:76px;height:22px;border-radius:12px"></i>`,
+    holeL:`<i class="cut" style="top:12px;left:22px;width:14px;height:14px;border-radius:50%"></i>`,
+    hole:`<i class="cut" style="top:12px;left:50%;margin-left:-7px;width:14px;height:14px;border-radius:50%"></i>`}[fp.cut]||"";
+  return `<div class="frame" style="background:linear-gradient(160deg,${W[0]},${W[1]});border-radius:${Math.round(fp.r*1.9)}px;box-shadow:0 8px 24px #0004,inset 0 0 0 ${Math.max(6,Math.round(fp.bz*2.4))}px #0b0b10;position:relative;padding-top:46px">${cut}
       <div class="clock">12:30</div>
       <div class="home">
         <button class="app" data-act="go" data-v="settings" data-dev="${p.id}"><div class="ic" style="background:#6b7480">⚙️</div>${t("app_settings")}</button>
@@ -941,12 +1035,38 @@ V.phone = ()=>{
     <div style="height:8px"></div>
     <button class="btn wide" data-act="sell" data-pid="${p.id}">${t("sellFor",{p:fmt(sellPrice(p))})}</button>`;
 };
+const CAMPOS = {sq2:[28,30],diag2:[28,30],sq3:[30,34],vert3:[24,44],contour3:[30,40],bar2:[40,55],sqR:[28,34],sqBig:[34,38],circ:[42,44],sqOp:[30,36],glyph:[30,38]};
+function wsSvg(p){
+  const sp = specOf(p.m), fp = fpOf(p), op = !!p.open, uid = "ws"+(p.seed||1);
+  const origB = p.ob !== false, bat = Math.max(5, Math.min(100, p.bat||80));
+  const bad = "#ef4444", ok = "#22c55e", cp = CAMPOS[sp.bk] || [30,34];
+  const inner = `
+    <rect x="7" y="5" width="106" height="210" rx="${fp.r-2}" fill="#171a22"/>
+    <rect x="12" y="11" width="96" height="86" rx="7" fill="#1f6b4a"/>
+    <g stroke="#5fd39a" stroke-opacity=".5" stroke-width=".9" fill="none"><path d="M16 70 H44 V30 H58"/><path d="M16 84 H60"/><path d="M104 62 H90 V86 H72"/></g>
+    <rect x="60" y="46" width="28" height="24" rx="3" fill="#2c3440" stroke="#9fb3c8" stroke-width=".6"/><text x="74" y="61" font-size="6" font-weight="700" fill="#cbd5e1" text-anchor="middle" font-family="system-ui">SoC</text>
+    <rect x="16" y="86" width="12" height="7" rx="1.5" fill="#2c3440"/><rect x="32" y="88" width="9" height="5" rx="1.2" fill="#2c3440"/><rect x="92" y="84" width="12" height="8" rx="1.5" fill="#2c3440"/>
+    <rect x="76" y="16" width="28" height="13" rx="3" fill="${p.imeiBad?"#7f1d1d":"#14532d"}" stroke="${p.imeiBad?bad:ok}" stroke-width="1.4"/>
+    <text x="90" y="25.4" font-size="6.2" font-weight="800" fill="#fff" text-anchor="middle" font-family="system-ui">IMEI${p.imeiBad?" ✖":" ✓"}</text>
+    ${lens(cp[0],cp[1],9.5,uid)}${p.cam?`<circle cx="${cp[0]}" cy="${cp[1]}" r="12" fill="none" stroke="${bad}" stroke-width="2"/><g stroke="${bad}" stroke-width="2.6" stroke-linecap="round"><path d="M${cp[0]-8} ${cp[1]-8} L${cp[0]+8} ${cp[1]+8}"/><path d="M${cp[0]+8} ${cp[1]-8} L${cp[0]-8} ${cp[1]+8}"/></g>`:""}
+    <rect x="12" y="104" width="96" height="104" rx="9" fill="${origB?"#2563eb":"#9ca3af"}" stroke="#fff" stroke-opacity=".4" stroke-width="1"/>
+    <rect x="15" y="${105+99-(95*bat/100)}" width="90" height="${95*bat/100}" rx="7" fill="#fff" fill-opacity=".18"/>
+    <text x="60" y="150" font-size="22" font-weight="800" fill="#fff" text-anchor="middle" font-family="system-ui">${p.bat}%</text>
+    <text x="60" y="168" font-size="8.4" font-weight="800" fill="#fff" text-anchor="middle" font-family="system-ui">${origB?"ORIGINAL ✓":"COPY ?"}</text>
+    <rect x="52" y="198" width="16" height="4" rx="1.4" fill="#facc15"/>`;
+  const cover = backInner(Object.assign({}, p, {c: p.back ? 0 : 3}), uid);
+  return `<svg viewBox="0 0 120 220" width="100%" style="max-width:240px;display:block;margin:0 auto;overflow:hidden" role="img">
+    ${sideBtns(fp, sp)}
+    <rect x="5" y="3" width="110" height="214" rx="${fp.r}" fill="${sp.frame}"/><rect x="5" y="3" width="110" height="214" rx="${fp.r}" fill="#fff" fill-opacity=".12"/>
+    <defs><clipPath id="${uid}k"><rect x="5" y="3" width="110" height="214" rx="${fp.r}"/></clipPath></defs>
+    <g clip-path="url(#${uid}k)">${inner}<g class="wscover ${op?"off":"on"}${WSANIM?" anim":""}">${cover}</g></g></svg>`;
+}
 V.workshop = ()=>{
   const p = findP(nav.pid); if (!p) return `<p class="empty">—</p>`;
   const op = !!p.open;
   const btn = (k,label,cost,dis) => `<button class="btn wide ${dis?"ghost":""}" data-act="ws" data-k="${k}">${label} · ${fmt(cost)}</button>`;
   const batTxt = op ? `${p.bat}% · ${t(p.ob===false?"ws_copy":"ws_orig")}` : `${p.bat}% · <small>${t("ws_hidden")}</small>`;
-  let h = `<div class="card"><div class="thumb">${phoneSvg(p,0)}</div><div class="ct"><div class="nm">${esc(pname(p))}</div><div class="sub">${t("worth")}: ${fmt(sellPrice(p))}</div></div></div>
+  let h = `<div class="wsvis">${wsSvg(p)}</div><div class="card"><div class="thumb">${thumb(p,0)}</div><div class="ct"><div class="nm">${esc(pname(p))}</div><div class="sub">${t("worth")}: ${fmt(sellPrice(p))}</div></div></div>
     <div class="row"><span>${t("ws_screen")}</span><b>${t("conds")[p.c]}</b></div>
     <div class="row"><span>${t("ws_back")}</span><b>${t(p.back?"ws_backBad":"ws_backOk")}</b></div>
     <div class="row"><span>${t("ws_bat")}</span><b>${batTxt}</b></div>
@@ -1083,11 +1203,11 @@ V.owner = ()=>{
 const TITLES = {ads:"app_ads",listing:"listingTitle",chats:"chatsTitle",chat:"chatsTitle",meet:"meetTitle",stock:"stockTitle",workshop:"ws_title",own:"own_title",
   phone:"phoneTitle",gallery:"galleryTitle",profile:"profileTitle",onboard:"profileTitle",settings:"settingsTitle",admin:"adminTitle",owner:"ownerTitle"};
 
-let lastView = null;
+let lastView = null, FORCE_TOP = false, WSANIM = false;
 function render(){
   if (!S.profile && nav.view !== "onboard"){ nav = {view:"onboard"}; stack = []; startOnboard(false); }
   const old = document.querySelector("main");
-  const st = old && lastView === nav.view ? old.scrollTop : 0;
+  const st = old && lastView === nav.view && !FORCE_TOP ? old.scrollTop : 0; FORCE_TOP = false;
   const v = nav.view;
   if (!S.profile){ $app.innerHTML = `<main>${V.onboard()}</main>`; lastView = v; return; }
   const bar = v === "home" ? "" : `<div class="appbar"><button class="ab" data-act="back">‹</button>
@@ -1104,6 +1224,7 @@ function render(){
       <div class="btns"><button class="btn ghost" data-act="resetno">${t("resetNo")}</button>
       <button class="btn danger" data-act="resetyes">${t("resetYes")}</button></div></div></div>`:""}${askWipe?`<div class="overlay"><div class="modal"><p>💥 Запустить ВАЙП? У всех, кто сейчас в игре, через 10 секунд сотрётся весь прогресс. Остальным он сотрётся при следующем входе. У тебя самого прогресс не сотрётся.</p>
       <div class="btns"><button class="btn ghost" data-act="wipeno">Отмена</button><button class="btn danger" data-act="wipeyes">💥 Запустить</button></div></div></div>`:""}${mod}`;
+  WSANIM = false;
   const main = document.querySelector("main");
   if (v === "chat"){ const m = document.getElementById("msgs"); if (m) m.scrollTop = m.scrollHeight; }
   else if (main) main.scrollTop = st;
@@ -1204,8 +1325,8 @@ function act(a, d){
     }
     case "ws": {
       const p = findP(nav.pid); if (!p) return; const k = d.k;
-      if (k === "open"){ p.open = true; save(); break; }
-      if (k === "close"){ p.open = false; save(); break; }
+      if (k === "open"){ p.open = true; FORCE_TOP = true; WSANIM = true; save(); break; }
+      if (k === "close"){ p.open = false; FORCE_TOP = true; WSANIM = true; save(); break; }
       const needOpen = ["batOrig","batCopy","cam","imei"].includes(k);
       if (needOpen && !p.open){ toast(t("ws_needOpen")); return; }
       if (k==="scr" && p.c>=2){ toast(t("ws_screenGood")); return; }
@@ -1221,7 +1342,7 @@ function act(a, d){
       else if (k==="batCopy"){ p.bat = between(85,95); p.ob = false; }
       else if (k==="cam") p.cam = false;
       else if (k==="imei") p.imeiBad = false;
-      save(); toast(t("ws_done")); break;
+      FORCE_TOP = true; save(); toast(t("ws_done")); break;
     }
     case "ob_pick": { const f = document.getElementById("obFile"); if (f) f.click(); return; }
     case "ob_tg": OB.avatar = tgUser().photo_url || OB.avatar; break;
